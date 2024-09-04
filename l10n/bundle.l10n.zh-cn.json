@@ -1,0 +1,9 @@
+{
+    "Copy": "复制",
+    "Run": "运行",
+    "Copied code block to clipboard": "已复制代码块到剪贴板",
+    "Failed to copy code block: {0}": "复制代码块失败: {0}",
+    "Copy code block": "复制代码块",
+    "Run code block{0}": "运行代码块{0}",
+    "Running {0}": "正在运行 {0}"
+}

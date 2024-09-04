@@ -1,0 +1,18 @@
+{
+    "ext.title": "Simple Runner",
+    "ext.description": "Provides a button on editor title to run file and codelens 'Copy' and 'Run' for markdown code block.",
+    "command.runFile": "Run This File",
+    "command.stopTask": "Stop This File Task",
+    "command.toggleRunInTerminal": "Toggle Run in Terminal.",
+    "command.toggleShowDebugInfo": "Toggle Show Debug Infomation.",
+    "command.toggleClearOutputBeforeRun": "Toggle Clear Output before Run.",
+    "config.enableRunButton": "Enable run button",
+    "config.enableMarkdownCodeLens": "Enable markdown codelens.",
+    "config.markdownCodeLensStyle": "Markdown CodeLens style.",
+    "config.runInTerminal": "Run in terminal.",
+    "config.showDebugInfo": "Show debug infomation in ouput channel.",
+    "config.showTimestampInDebugInfo": "Show timestamp in debug infomation.",
+    "config.clearOutputBeforeRun": "Clear output before run.",
+    "config.showOutputBeforeRun": "Show output before run.",
+    "config.runnerMap": "Runner Map by Language  \nThe following predefined variables are supported:\n\n- **${file}** - the current opened file\n- **${fileBasename}** - the current opened file's basename\n- **${fileBasenameNoExtension}** - the current opened file's basename with no file extension\n- **${fileExtname}** - the current opened file's extension\n- **${fileDirname}** - the current opened file's folder path\n- **${fileDirnameBasename}** - the current opened file's folder name\n- **${pathSeparator}** - the character used by the operating system to separate components in file paths\n- **${extTmpDir}** - the extension temporay folder"
+}
