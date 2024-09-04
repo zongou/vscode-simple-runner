@@ -1,0 +1,6 @@
+.vscode
+src
+.gitignore
+tsconfig.json
+.vscode-test-web
+scripts.md

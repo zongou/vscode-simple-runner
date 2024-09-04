@@ -1,0 +1,234 @@
+{
+	"name": "simple-runner",
+	"displayName": "Simple Runner",
+	"description": "Markdown notbook support, run simple code and Markdown code blocks.",
+	"version": "0.0.27",
+	"publisher": "zongou",
+	"repository": "https://github.com/zongou/vscode-simple-runner",
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Programming Languages",
+		"Other"
+	],
+	"keywords": [
+		"markdown",
+		"notebook",
+		"codebook",
+		"run",
+		"runner",
+		"code",
+		"codeblock",
+		"code-block"
+	],
+	"icon": "resources/icon.png",
+	"activationEvents": [
+		"onStartupFinished"
+	],
+	"main": "./out/extension.js",
+	"browser": "./out/extension.js",
+	"l10n": "./l10n",
+	"contributes": {
+		"menus": {
+			"editor/title": [
+				{
+					"when": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages && resourcePath not in simple-runner.fileListInTask",
+					"command": "simple-runner.runFile",
+					"group": "navigation"
+				},
+				{
+					"when": "simple-runner.enableRunButton && resourcePath in simple-runner.fileListInTask",
+					"command": "simple-runner.stopTask",
+					"group": "navigation"
+				}
+			]
+		},
+		"notebooks": [
+			{
+				"type": "simple-runner",
+				"displayName": "Simple Runner",
+				"priority": "option",
+				"selector": [
+					{
+						"filenamePattern": "*.{md,markdown}"
+					},
+					{
+						"filenamePattern": "*"
+					}
+				]
+			}
+		],
+		"commands": [
+			{
+				"enablement": "!simple-runner.isWeb && resourceLangId in simple-runner.supportedLanguages && resourcePath not in simple-runner.fileListInTask",
+				"command": "simple-runner.runFile",
+				"title": "%command.runFile%",
+				"icon": "$(debug-start)",
+				"category": "%ext.title%"
+			},
+			{
+				"enablement": "resourcePath in simple-runner.fileListInTask",
+				"command": "simple-runner.stopTask",
+				"title": "%command.stopTask%",
+				"icon": "$(debug-stop)",
+				"category": "%ext.title%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleRunInTerminal",
+				"title": "%command.toggleRunInTerminal%",
+				"category": "%ext.title%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleClearOutputBeforeRun",
+				"title": "%command.toggleClearOutputBeforeRun%",
+				"category": "%ext.title%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleShowDebugInfo",
+				"title": "%command.toggleShowDebugInfo%",
+				"category": "%ext.title%"
+			}
+		],
+		"configuration": {
+			"title": "%ext.title%",
+			"properties": {
+				"simple-runner.enableRunButton": {
+					"order": 0,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.enableRunButton%"
+				},
+				"simple-runner.enableMarkdownCodeLens": {
+					"order": 1,
+					"type": "boolean",
+					"default": true,
+					"markdownDescription": "%config.enableMarkdownCodeLens%"
+				},
+				"simple-runner.runInTerminal": {
+					"order": 2,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.runInTerminal%"
+				},
+				"simple-runner.showOutputBeforeRun": {
+					"order": 3,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.showOutputBeforeRun%"
+				},
+				"simple-runner.clearOutputBeforeRun": {
+					"order": 4,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.clearOutputBeforeRun%"
+				},
+				"simple-runner.showDebugInfo": {
+					"order": 5,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.showDebugInfo%"
+				},
+				"simple-runner.showTimestampInDebugInfo": {
+					"order": 6,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.showTimestampInDebugInfo%"
+				},
+				"simple-runner.executorMap": {
+					"order": 7,
+					"type": "object",
+					"patternProperties": {
+						"^.+$": {
+							"type": "string",
+							"minLength": 0
+						}
+					},
+					"additionalProperties": false,
+					"default": {
+						"ahk": "autohotkey \"${file}\"",
+						"applescript": "osascript \"${file}\"",
+						"autoit": "autoit3 \"${file}\"",
+						"awk": "awk -f \"${file}\"",
+						"bat": "cmd /c \"${file}\"",
+						"c": "cc \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"clojure": "lein exec \"${file}\"",
+						"coffeescript": "coffee \"${file}\"",
+						"cpp": "c++ \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"crystal": "crystal \"${file}\"",
+						"csharp": "scriptcs \"${file}\"",
+						"d": "dmd \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"dart": "dart \"${file}\"",
+						"erlang": "escript \"${file}\"",
+						"fortran_fixed-form": "gfortran \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"fortran-modern": "gfortran \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"fortran": "gfortran \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"FortranFreeForm": "gfortran \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"fsharp": "fsi \"${file}\"",
+						"gleam": "gleam run -m \"${fileDirnamename}${/}${fileBasenameNoExtension}\"",
+						"go": "go run \"${file}\"",
+						"groovy": "groovy \"${file}\"",
+						"haskell": "runghc \"${file}\"",
+						"haxe": "haxe --cwd ${fileDirname} --run \"${fileBasenameNoExtension}\"",
+						"java": "java \"${file}\"",
+						"javascript": "node \"${file}\"",
+						"julia": "julia \"${file}\"",
+						"kit": "kitc --run \"${file}\"",
+						"less": "lessc \"${file}\" \"${extTmpDir}${/}${fileBasenameNoExtension}.css\"",
+						"lisp": "sbcl --script \"${file}\"",
+						"lua": "lua \"${file}\"",
+						"mojo": "mojo run \"${file}\"",
+						"nim": "nim compile --verbosity:0 --hints:off --run \"${file}\"",
+						"objective-c": "gcc -framework Cocoa \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"ocaml": "ocaml \"${file}\"",
+						"pascal": "fpc \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"perl": "perl \"${file}\"",
+						"perl6": "perl6 \"${file}\"",
+						"php": "php \"${file}\"",
+						"pkl": "pkl eval -f yaml \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}.yaml\"",
+						"powershell": "powershell -ExecutionPolicy ByPass -File \"${file}\"",
+						"python": "python -u -X utf8 \"${file}\"",
+						"r": "Rscript \"${file}\"",
+						"racket": "racket \"${file}\"",
+						"ruby": "ruby \"${file}\"",
+						"rust": "rustc \"${file}\" -o \"${extTmpDir}${/}${fileBasenameNoExtension}\" && \"${extTmpDir}${/}${fileBasenameNoExtension}\"",
+						"sass": "sass --style expanded \"${file}\"",
+						"scala": "scala \"${file}\"",
+						"scheme": "csi -script \"${file}\"",
+						"scss": "scss --style expanded \"${file}\"",
+						"shellscript": "chmod +x \"${file}\" && \"${file}\"",
+						"sml": "sml \"${file}\"",
+						"spwn": "spwn build \"${file}\"",
+						"swift": "swift \"${file}\"",
+						"typescript": "ts-node \"${file}\"",
+						"v": "v run \"${file}\"",
+						"vb": "cscript //Nologo \"${file}\"",
+						"zig": "zig run \"${file}\""
+					},
+					"markdownDescription": "%config.executorMap%"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.13.0",
+		"@stylistic/eslint-plugin": "^2.9.0",
+		"@types/node": "^20",
+		"@types/vscode": "^1.73.0",
+		"eslint": "^9.13.0",
+		"typescript": "^5.7.2",
+		"typescript-eslint": "^8.16.0"
+	},
+	"dependencies": {
+		"tree-kill": "^1.2.2"
+	}
+}
