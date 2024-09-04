@@ -1,0 +1,17 @@
+{
+    "ext.title": "Simple Runner",
+    "command.runFile": "运行此文件",
+    "command.stopTask": "停止此文件任务",
+    "command.toggleRunInTerminal": "切换在终端中运行。",
+    "command.toggleShowDebugInfo": "切换显示调试信息。",
+    "command.toggleClearOutputBeforeRun": "切换运行前清除输出。",
+    "config.enableRunButton": "启用运行按钮",
+    "config.enableMarkdownCodeLens": "启用 Markdown 代码透镜。",
+    "config.markdownCodeLensStyle": "Markdown 代码透镜样式。",
+    "config.runInTerminal": "在终端中运行。",
+    "config.showDebugInfo": "在输出通道中显示调试信息。",
+    "config.showTimestampInDebugInfo": "在调试信息中显示时间戳。",
+    "config.clearOutputBeforeRun": "运行前清除输出。",
+    "config.showOutputBeforeRun": "运行前显示输出。",
+    "config.languageRunnerMap": "支持以下预定义变量\n\n- **${file}** - 当前打开的文件\n- **${fileBasename}** - 当前打开文件的基本名称\n- **${fileBasenameNoExtension}** - 当前打开文件的基本名称，不带文件扩展名\n- **${fileExtname}** - 当前打开文件的扩展名\n- **${fileDirname}** - 当前打开文件的文件夹路径\n- **${fileDirnameBasename}** - 当前打开文件的文件夹名称\n- **${pathSeparator}** - 操作系统用于分隔文件路径中组件的字符\n- **${/}** - **${pathSeparator}** 的简写形式\n- **${extTmpDir}** - 扩展程序临时文件夹"
+}
