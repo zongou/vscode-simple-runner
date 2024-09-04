@@ -1,0 +1,150 @@
+{
+	"name": "simple-runner",
+	"displayName": "%ext.displayName%",
+	"description": "%ext.description%",
+	"version": "0.0.34",
+	"publisher": "zongou",
+	"repository": "https://github.com/zongou/vscode-simple-runner",
+	"engines": {
+		"vscode": "^1.70.0"
+	},
+	"categories": [
+		"Programming Languages"
+	],
+	"icon": "resources/icon.png",
+	"activationEvents": [
+		"onLanguage:markdown",
+		"onStartupFinished"
+	],
+	"main": "./out/extension.js",
+	"browser": "./out/extension.js",
+	"l10n": "./l10n",
+	"contributes": {
+		"menus": {
+			"editor/title": [
+				{
+					"when": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages",
+					"command": "simple-runner.runFile",
+					"group": "navigation"
+				}
+			]
+		},
+		"commands": [
+			{
+				"enablement": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages",
+				"command": "simple-runner.runFile",
+				"title": "%runButton.title%",
+				"icon": "$(debug-start)",
+				"category": "%ext.displayName%"
+			}
+		],
+		"configuration": {
+			"title": "%ext.displayName%",
+			"properties": {
+				"simple-runner.enableMarkdownCodeLens": {
+					"order": 0,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.enableMarkdownCodeLens%"
+				},
+				"simple-runner.enableRunButton": {
+					"order": 1,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.enableRunButton%"
+				},
+				"simple-runner.clearOutputBeforeRun": {
+					"order": 3,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.clearOutputBeforeRun%"
+				},
+				"simple-runner.showOutputBeforeRun": {
+					"order": 4,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.showOutputBeforeRun%"
+				},
+				"simple-runner.runnerMap": {
+					"order": 5,
+					"type": "object",
+					"default": {
+						"ahk": "autohotkey \"{file}\"",
+						"applescript": "osascript \"{file}\"",
+						"autoit": "autoit3 \"{file}\"",
+						"awk": "awk -f \"{file}\"",
+						"bat": "\"{file}\"",
+						"c": "cc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"clojure": "lein exec \"{file}\"",
+						"coffeescript": "coffee \"{file}\"",
+						"cpp": "c++ \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"crystal": "crystal \"{file}\"",
+						"csharp": "scriptcs \"{file}\"",
+						"d": "dmd \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"dart": "dart \"{file}\"",
+						"erlang": "escript \"{file}\"",
+						"fortran_fixed-form": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"fortran-modern": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"fortran": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"FortranFreeForm": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"fsharp": "fsi \"{file}\"",
+						"gleam": "gleam run -m \"{fileDirname}{pathSep}{fileBasenameNoExtension}\"",
+						"go": "go run \"{file}\"",
+						"groovy": "groovy \"{file}\"",
+						"haskell": "runghc \"{file}\"",
+						"haxe": "haxe --cwd {fileDir} --run \"{fileBasenameNoExtension}\"",
+						"java": "java \"{file}\"",
+						"javascript": "node \"{file}\"",
+						"julia": "julia \"{file}\"",
+						"kit": "kitc --run \"{file}\"",
+						"less": "lessc \"{file}\" \"{extTmpDir}{pathSep}{fileBasenameNoExtension}.css\"",
+						"lisp": "sbcl --script \"{file}\"",
+						"lua": "lua \"{file}\"",
+						"mojo": "mojo run \"{file}\"",
+						"nim": "nim compile --verbosity:0 --hints:off --run \"{file}\"",
+						"objective-c": "gcc -framework Cocoa \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"ocaml": "ocaml \"{file}\"",
+						"pascal": "fpc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"perl": "perl \"{file}\"",
+						"perl6": "perl6 \"{file}\"",
+						"php": "php \"{file}\"",
+						"pkl": "pkl eval -f yaml \"{file}\" -o \"{extTmpDir}{pathSep}{fileBasenameNoExtension}.yaml\"",
+						"powershell": "powershell -ExecutionPolicy ByPass -File \"{file}\"",
+						"python": "python -u \"{file}\"",
+						"r": "Rscript \"{file}\"",
+						"racket": "racket \"{file}\"",
+						"ruby": "ruby \"{file}\"",
+						"rust": "rustc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
+						"sass": "sass --style expanded \"{file}\"",
+						"scala": "scala \"{file}\"",
+						"scheme": "csi -script \"{file}\"",
+						"scss": "scss --style expanded \"{file}\"",
+						"shellscript": "chmod +x \"{file}\" && \"{file}\"",
+						"sml": "sml \"{file}\"",
+						"spwn": "spwn build \"{file}\"",
+						"swift": "swift \"{file}\"",
+						"typescript": "ts-node \"{file}\"",
+						"v": "v run \"{file}\"",
+						"vbscript": "cscript //Nologo \"{file}\"",
+						"zig": "zig run \"{file}\""
+					},
+					"description": "%config.runnerMap%"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\"",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "^18",
+		"@types/vscode": "^1.70.0",
+		"@typescript-eslint/eslint-plugin": "^7.14.0",
+		"@typescript-eslint/parser": "^7.14.0",
+		"eslint": "^8.26.0",
+		"typescript": "^5.5.2"
+	}
+}

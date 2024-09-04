@@ -1,0 +1,10 @@
+{
+    "ext.displayName": "Simple Runner",
+    "ext.description": "Provides a button on editor title to run file and code lens 'Copy' and 'Run' for markdown code block.",
+    "runButton.title": "Run this file",
+    "config.enableMarkdownCodeLens": "Enable markdown code block code lens.",
+    "config.enableRunButton": "Enable run button.",
+    "config.clearOutputBeforeRun": "Clear output before run.",
+    "config.showOutputBeforeRun": "Show output before run.",
+    "config.runnerMap": "Runner map by language, available variables: {file}, {fileDir}, {fileBasename}, {fileBasenameNoExtension}, {fileExtname}, {pathSep}, {extTmpDir}"
+}

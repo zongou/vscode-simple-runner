@@ -1,0 +1,10 @@
+{
+    "ext.displayName": "简易运行器",
+    "ext.description": "在编辑器标题栏提供一个运行文件的按钮，并为 Markdown 代码块提供 '复制' 和 '运行' 的代码透镜功能。",
+    "runButton.title": "运行此文件",
+    "config.enableMarkdownCodeLens": "启用 Markdown 代码块的代码透镜。",
+    "config.enableRunButton": "启用运行按钮。",
+    "config.clearOutputBeforeRun": "运行前清除输出。",
+    "config.showOutputBeforeRun": "运行前显示输出。",
+    "config.runnerMap": "按语言划分的运行器映射，可用变量: {file}, {fileDir}, {fileBasename}, {fileBasenameNoExtension}, {fileExtname}, {pathSep}, {extTmpDir}"
+}
