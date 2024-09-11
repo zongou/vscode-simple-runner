@@ -1,7 +1,7 @@
 # vscode-simple-runner
 
 - [x] Provides a button on editor title to run file.
-- [x] Provides code lens `Copy` and `Run` for markdown code block.
+- [x] Provides codelens `Copy` and `Run` for markdown code block.
 
 ## Runner Map
 

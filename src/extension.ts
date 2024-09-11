@@ -1,18 +1,26 @@
 import * as vscode from 'vscode';
 
 enum ids {
-	ext = 'simple-runner',
-	isWeb = ext + '.isWeb',
+	ext = "simple-runner",
+	isWeb = ext + "." + "isWeb",
 	debug = ext + "_debug",
-	enableRunButton = ext + ".enableRunButton",
-	enableMarkdownCodeLens = ext + '.enableMarkdownCodeLens',
-	showOutputBeforeRun = ext + '.showOutputBeforeRun',
-	clearOutputBeforeRun = ext + '.clearOutputBeforeRun',
-	runnerMap = ext + '.runnerMap',
-	runFile = ext + ".runFile",
-	supportedLanguages = ext + ".supportedLanguages",
-	copyCodeBlock = ext + '.copyCodeBlock',
-	runCodeBlock = ext + '.runCodeBlock',
+	enableRunButton = ext + "." + "enableRunButton",
+	enableMarkdownCodeLens = ext + "." + "enableMarkdownCodeLens",
+	showOutputBeforeRun = ext + "." + "showOutputBeforeRun",
+	clearOutputBeforeRun = ext + "." + "clearOutputBeforeRun",
+	runnerMap = ext + "." + "runnerMap",
+	runFile = ext + "." + "runFile",
+	stopTask = ext + "." + "stopTask",
+	supportedLanguages = ext + "." + "supportedLanguages",
+	copyCodeBlock = ext + "." + "copyCodeBlock",
+	runCodeBlock = ext + "." + "runCodeBlock",
+	tasks = ext + "." + "tasks",
+	runInTerminal = ext + "." + "runInTerminal",
+	toggleEnableRunButton = ext + "." + "toggleEnableRunButton",
+	toggleEnableMarkdownCodeLens = ext + "." + "toggleEnableMarkdownCodeLens",
+	toggleRunInTerminal = ext + "." + "toggleRunInTerminal",
+	toggleClearOutputBeforeRun = ext + "." + "toggleClearOutputBeforeRun",
+	toggleShowOutputBeforeRun = ext + "." + "toggleShowOutputBeforeRun",
 }
 
 const isWeb: boolean = typeof process === 'undefined'
@@ -21,15 +29,50 @@ vscode.commands.executeCommand('setContext', ids.isWeb, isWeb);
 const getConfig: () => any = () => vscode.workspace.getConfiguration();
 const getrunnerMap: () => any = () => getConfig().get(ids.runnerMap);
 
-const debugChannel = vscode.window.createOutputChannel(ids.debug);
+const debugChannel = vscode.window.createOutputChannel(ids.debug, 'log');
+const outputChannel = vscode.window.createOutputChannel(ids.ext, 'log');
 let terminal: vscode.Terminal | null = null;
+const tasks: Map<string, any> = new Map();
+
+function getFormatedDate(date: Date) {
+	const year = date.getFullYear();
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const day = String(date.getDate()).padStart(2, '0');
+	const hours = String(date.getHours()).padStart(2, '0');
+	const minutes = String(date.getMinutes()).padStart(2, '0');
+	const seconds = String(date.getSeconds()).padStart(2, '0');
+	const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
+function makeExtTmpDir(): string | null {
+	const { tmpdir } = require('os');
+	const path = require('path');
+	const fs = require('fs');
+
+	const extTmpDir = path.join(tmpdir(), ids.ext);
+
+	// Check if the directory exists
+	if (!fs.existsSync(extTmpDir)) {
+		// Create the directory if it does not exist
+		try {
+			fs.mkdirSync(extTmpDir, { recursive: true });
+			debugChannel.appendLine(`${getFormatedDate(new Date())} [info] Directory ${extTmpDir} created successfully.`);
+		} catch (err) {
+			debugChannel.appendLine(`${getFormatedDate(new Date())} [error] Failed to create directory: ${err}`);
+			return null;
+		}
+	}
+	return extTmpDir;
+}
 
 function runInTerminal(command: string, context: vscode.ExtensionContext) {
 	if (!terminal) {
 		for (const t in vscode.window.terminals) {
 			for (const t of vscode.window.terminals) {
 				if (t.name == ids.ext) {
-					debugChannel.appendLine(`terminal: found ${ids.ext}`);
+					debugChannel.appendLine(`${getFormatedDate(new Date())} [info] terminal: terminal named '${ids.ext}' exists.`);
 					terminal = t;
 					context.subscriptions.push(terminal);
 					break;
@@ -53,25 +96,55 @@ function runInTerminal(command: string, context: vscode.ExtensionContext) {
 	terminal.sendText(command);
 }
 
-function makeExtTmpDir(): string | null {
-	const { tmpdir } = require('os');
-	const path = require('path');
-	const fs = require('fs');
-
-	const extTmpDir = path.join(tmpdir(), ids.ext);
-
-	// Check if the directory exists
-	if (!fs.existsSync(extTmpDir)) {
-		// Create the directory if it does not exist
-		try {
-			fs.mkdirSync(extTmpDir, { recursive: true });
-			debugChannel.appendLine(`Directory ${extTmpDir} created successfully.`);
-		} catch (err) {
-			debugChannel.appendLine(`Failed to create directory: ${err}`);
-			return null;
-		}
+async function runChildProcess(command: string, filePath: string): Promise<any> {
+	if (getConfig().get(ids.showOutputBeforeRun)) {
+		outputChannel.show();
 	}
-	return extTmpDir;
+	if (getConfig().get(ids.clearOutputBeforeRun)) {
+		outputChannel.clear();
+	}
+	outputChannel.appendLine(`${getFormatedDate(new Date())} [info] Running ${filePath}`);
+
+	await vscode.window.withProgress({
+		location: vscode.ProgressLocation.Notification,
+		title: vscode.l10n.t('Running {0}', filePath),
+		cancellable: true
+	}, async (progress, token) => {
+		const startTime = new Date();
+		const childProcess = require('child_process').spawn(command, { shell: true });
+		tasks.set(filePath, childProcess);
+		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
+
+		childProcess.stdout.on('data', (data: { toString: () => string; }) => {
+			outputChannel.append(data.toString());
+		});
+
+		childProcess.stderr.on('data', (data: { toString: () => string; }) => {
+			outputChannel.append(data.toString());
+		});
+
+		token.onCancellationRequested(() => {
+			require('tree-kill')(childProcess.pid, 'SIGKILL');
+		});
+
+		await new Promise((resolve, reject) => {
+			childProcess.on('close', (code: null, signal: any) => {
+				const formatedDate = getFormatedDate(new Date());
+				tasks.delete(filePath);
+				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
+				if (signal) {
+					outputChannel.append(`\n${formatedDate} [info] Child process was killed by signal: ${signal}\n`);
+					resolve(new Error(`Child process was killed by signal: ${signal}`));
+				} else if (code === null) {
+					outputChannel.append(`${formatedDate} [info] Child process was killed by unknown means.\n`);
+					resolve(new Error(`Child process was killed by unknown means.`));
+				} else {
+					outputChannel.append(`${formatedDate} [info] Child process exited with code: ${code}\n`);
+					resolve('Done');
+				}
+			});
+		});
+	});
 }
 
 function runFile(filePath: string, languageId: string, context: vscode.ExtensionContext) {
@@ -96,7 +169,11 @@ function runFile(filePath: string, languageId: string, context: vscode.Extension
 		.replace(/\{extTmpDir\}/g, extTmpDir)
 		.replace(/\{pathSep\}/g, path.sep);
 
-	runInTerminal(command, context);
+	if (getConfig().get(ids.runInTerminal)) {
+		runInTerminal(command, context);
+	} else {
+		runChildProcess(command, filePath);
+	}
 }
 
 function copyCodeBlock(codeBlock: any) {
@@ -121,7 +198,7 @@ async function runCodeBlock(codeBlock: any, context: vscode.ExtensionContext) {
 	try {
 		fs.writeFileSync(filePath, codeBlock.content);
 	} catch (err) {
-		debugChannel.appendLine(`Failed to write to file: ${err}`);
+		debugChannel.appendLine(`${getFormatedDate(new Date())} [error] Failed to write to file: ${err}`);
 		return;
 	}
 
@@ -158,7 +235,7 @@ function getLanguageByCodeBlockType(codeBlockType: string): { languageId: string
 	}
 }
 
-// Define a function to provide code lenses for each code block
+// Define a function to provide codelens for each code block
 function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 	const codeLenses: vscode.CodeLens[] = [];
 	if (getConfig().get(ids.enableMarkdownCodeLens)) {
@@ -202,7 +279,7 @@ function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLe
 						language: getLanguageByCodeBlockType(codeBlockType)
 					};
 
-					// Add a code lens to Copy code block
+					// Add a codelens to Copy code block
 					codeLenses.push(new vscode.CodeLens(new vscode.Range(
 						new vscode.Position(codeBlockStart, 0),
 						new vscode.Position(codeBlockStart, 0)
@@ -213,7 +290,7 @@ function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLe
 						arguments: [codeBlock]
 					}));
 
-					// Add a code lens to run the code block
+					// Add a codelens to run the code block
 					if (!isWeb && getrunnerMap()[codeBlock.language.languageId]) {
 						codeLenses.push(new vscode.CodeLens(new vscode.Range(
 							new vscode.Position(codeBlockStart, 0),
@@ -221,7 +298,7 @@ function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLe
 						), {
 							command: ids.runCodeBlock,
 							title: vscode.l10n.t('Run'),
-							tooltip: vscode.l10n.t('Run code block{0}', getrunnerMap()[codeBlockType] ? `\n${getrunnerMap()[codeBlockType]}` : ''),
+							tooltip: vscode.l10n.t('Run code block{0}', `\n${getrunnerMap()[codeBlock.language.languageId]}`),
 							arguments: [codeBlock]
 						}));
 					}
@@ -233,7 +310,6 @@ function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLe
 }
 
 function initMarkdownCodeLens(context: vscode.ExtensionContext) {
-	debugChannel.appendLine(`isWeb: ${isWeb}`);
 	context.subscriptions.push(vscode.languages.registerCodeLensProvider({ scheme: '*', language: 'markdown' }, {
 		provideCodeLenses: (document: vscode.TextDocument, token: vscode.CancellationToken) => {
 			return provideMarkdownCodeLenses(document);
@@ -265,25 +341,46 @@ function initRunButton(context: vscode.ExtensionContext) {
 			vscode.commands.executeCommand('setContext', ids.supportedLanguages, Object.keys(getrunnerMap()).filter(k => getrunnerMap()[k]));
 		}
 	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand(ids.runFile, (file) => {
-		// When called from command palette, file is undefined, use active editor.
-		const document = file ? vscode.workspace.textDocuments.find(d => d.uri.fsPath === file.fsPath) : vscode.window.activeTextEditor?.document;
-		if (document) {
-			runFile(document.uri.fsPath, document.languageId, context);
-		}
-	}));
 }
 
 export function activate(context: vscode.ExtensionContext) {
+	debugChannel.appendLine(`${getFormatedDate(new Date())} [info] isWeb: ${isWeb}`);
 	initMarkdownCodeLens(context);
 	if (!isWeb) {
 		initRunButton(context);
+
+		context.subscriptions.push(vscode.commands.registerCommand(ids.runFile, (file) => {
+			const document = file ? vscode.workspace.textDocuments.find(d => d.uri.fsPath === file.fsPath) : vscode.window.activeTextEditor?.document;
+			if (document) {
+				runFile(document.uri.fsPath, document.languageId, context);
+			}
+		}));
+
+		context.subscriptions.push(vscode.commands.registerCommand(ids.stopTask, (file) => {
+			const filePath = file ? file.fsPath : vscode.window.activeTextEditor?.document.uri.fsPath;
+			if (filePath && tasks.has(filePath)) {
+				require('tree-kill')(tasks.get(filePath).pid, 'SIGKILL');
+			}
+		}));
+
 		context.subscriptions.push(vscode.window.onDidCloseTerminal(t => {
 			if (t.name == ids.ext) {
 				terminal = null;
 			}
 		}));
+
+		const toggleMap = new Map();
+		toggleMap.set(ids.toggleEnableRunButton, ids.enableRunButton);
+		toggleMap.set(ids.toggleEnableMarkdownCodeLens, ids.enableMarkdownCodeLens);
+		toggleMap.set(ids.toggleRunInTerminal, ids.runInTerminal);
+		toggleMap.set(ids.toggleClearOutputBeforeRun, ids.clearOutputBeforeRun);
+		toggleMap.set(ids.toggleShowOutputBeforeRun, ids.showOutputBeforeRun);
+
+		toggleMap.forEach((value, key) => {
+			context.subscriptions.push(vscode.commands.registerCommand(key, (file) => {
+				vscode.workspace.getConfiguration().update(value, !getConfig().get(value), vscode.ConfigurationTarget.Global);
+			}));
+		});
 	}
 }
 

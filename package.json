@@ -23,35 +23,83 @@
 		"menus": {
 			"editor/title": [
 				{
-					"when": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages",
+					"when": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages && resourcePath not in simple-runner.tasks",
 					"command": "simple-runner.runFile",
+					"group": "navigation"
+				},
+				{
+					"when": "simple-runner.enableRunButton && resourcePath in simple-runner.tasks",
+					"command": "simple-runner.stopTask",
 					"group": "navigation"
 				}
 			]
 		},
 		"commands": [
 			{
-				"enablement": "!simple-runner.isWeb && simple-runner.enableRunButton && resourceLangId in simple-runner.supportedLanguages",
+				"enablement": "!simple-runner.isWeb && resourceLangId in simple-runner.supportedLanguages && resourcePath not in simple-runner.tasks",
 				"command": "simple-runner.runFile",
-				"title": "%runButton.title%",
+				"title": "%command.runFile%",
 				"icon": "$(debug-start)",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "resourcePath in simple-runner.tasks",
+				"command": "simple-runner.stopTask",
+				"title": "%command.stopTask%",
+				"icon": "$(debug-stop)",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleEnableRunButton",
+				"title": "%command.toggleEnableRunButton%",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleEnableMarkdownCodeLens",
+				"title": "%command.toggleEnableMarkdownCodeLens%",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleRunInTerminal",
+				"title": "%command.toggleRunInTerminal%",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleClearOutputBeforeRun",
+				"title": "%command.toggleClearOutputBeforeRun%",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleShowOutputBeforeRun",
+				"title": "%command.toggleShowOutputBeforeRun%",
 				"category": "%ext.displayName%"
 			}
 		],
 		"configuration": {
 			"title": "%ext.displayName%",
 			"properties": {
-				"simple-runner.enableMarkdownCodeLens": {
+				"simple-runner.enableRunButton": {
 					"order": 0,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.enableRunButton%"
+				},
+				"simple-runner.enableMarkdownCodeLens": {
+					"order": 1,
 					"type": "boolean",
 					"default": true,
 					"description": "%config.enableMarkdownCodeLens%"
 				},
-				"simple-runner.enableRunButton": {
-					"order": 1,
+				"simple-runner.runInTerminal": {
+					"order": 2,
 					"type": "boolean",
 					"default": true,
-					"description": "%config.enableRunButton%"
+					"description": "%config.runInTerminal%"
 				},
 				"simple-runner.clearOutputBeforeRun": {
 					"order": 3,
@@ -146,5 +194,8 @@
 		"@typescript-eslint/parser": "^7.14.0",
 		"eslint": "^8.26.0",
 		"typescript": "^5.5.2"
+	},
+	"dependencies": {
+		"tree-kill": "^1.2.2"
 	}
 }
