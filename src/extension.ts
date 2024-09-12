@@ -30,7 +30,7 @@ const getConfig: () => any = () => vscode.workspace.getConfiguration();
 const getrunnerMap: () => any = () => getConfig().get(ids.runnerMap);
 
 const debugChannel = vscode.window.createOutputChannel(ids.debug, 'log');
-const outputChannel = vscode.window.createOutputChannel(ids.ext, 'log');
+const outputChannel = !isWeb ? vscode.window.createOutputChannel(ids.ext, 'log') : undefined;
 let terminal: vscode.Terminal | null = null;
 const tasks: Map<string, any> = new Map();
 
@@ -98,12 +98,12 @@ function runInTerminal(command: string, context: vscode.ExtensionContext) {
 
 async function runChildProcess(command: string, filePath: string): Promise<any> {
 	if (getConfig().get(ids.showOutputBeforeRun)) {
-		outputChannel.show();
+		outputChannel?.show();
 	}
 	if (getConfig().get(ids.clearOutputBeforeRun)) {
-		outputChannel.clear();
+		outputChannel?.clear();
 	}
-	outputChannel.appendLine(`${getFormatedDate(new Date())} [info] Running ${filePath}`);
+	outputChannel?.appendLine(`${getFormatedDate(new Date())} [info] Running ${filePath}`);
 
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
@@ -116,11 +116,11 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 
 		childProcess.stdout.on('data', (data: { toString: () => string; }) => {
-			outputChannel.append(data.toString());
+			outputChannel?.append(data.toString());
 		});
 
 		childProcess.stderr.on('data', (data: { toString: () => string; }) => {
-			outputChannel.append(data.toString());
+			outputChannel?.append(data.toString());
 		});
 
 		token.onCancellationRequested(() => {
@@ -133,13 +133,13 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
-					outputChannel.append(`\n${formatedDate} [info] Child process was killed by signal: ${signal}\n`);
+					outputChannel?.append(`\n${formatedDate} [info] Child process was killed by signal: ${signal}\n`);
 					resolve(new Error(`Child process was killed by signal: ${signal}`));
 				} else if (code === null) {
-					outputChannel.append(`${formatedDate} [info] Child process was killed by unknown means.\n`);
+					outputChannel?.append(`${formatedDate} [info] Child process was killed by unknown means.\n`);
 					resolve(new Error(`Child process was killed by unknown means.`));
 				} else {
-					outputChannel.append(`${formatedDate} [info] Child process exited with code: ${code}\n`);
+					outputChannel?.append(`${formatedDate} [info] Child process exited with code: ${code}\n`);
 					resolve('Done');
 				}
 			});
