@@ -1,17 +1,19 @@
 {
     "ext.displayName": "简易运行器",
-    "ext.description": "在编辑器标题栏提供一个运行文件的按钮，并为 markdown 代码块提供 '复制' 和 '运行' 代码透镜。",
+    "ext.description": "在编辑器标题栏提供一个运行文件的按钮，并为 Markdown 代码块提供 '复制' 和 '运行' 的代码透镜功能。",
     "command.runFile": "运行此文件",
     "command.stopTask": "停止此任务",
     "command.toggleEnableRunButton": "切换启用运行按钮开关。",
     "command.toggleEnableMarkdownCodeLens": "切换启用 Markdown 代码透镜开关。",
     "command.toggleRunInTerminal": "切换在终端中运行开关。",
-    "command.toggleClearOutputBeforeRun": "切换运行前清空输出开关。",
+    "command.toggleClearOutputBeforeRun": "切换运行前清除输出开关。",
     "command.toggleShowOutputBeforeRun": "切换运行前显示输出开关。",
-    "config.enableMarkdownCodeLens": "启用Markdown代码透镜。",
+    "command.toggleShowDebugInfo": "切换显示调试信息开关。",
+    "config.enableMarkdownCodeLens": "启用 Markdown 代码透镜。",
     "config.enableRunButton": "启用运行按钮。",
     "config.runInTerminal": "在终端中运行。",
-    "config.clearOutputBeforeRun": "运行前清空输出。",
+    "config.clearOutputBeforeRun": "运行前清除输出。",
     "config.showOutputBeforeRun": "运行前显示输出。",
-    "config.runnerMap": "按语言划分的运行器映射，可用变量: {file}, {fileDir}, {fileBasename}, {fileBasenameNoExtension}, {fileExtname}, {pathSep}, {extTmpDir}"
+    "config.showDebugInfo": "在输出通道中显示调试信息。",
+    "config.runnerMap": "按语言映射运行器，可用变量：{file}, {fileDir}, {fileBasename}, {fileBasenameNoExtension}, {fileExtname}, {pathSep}, {extTmpDir}"
 }

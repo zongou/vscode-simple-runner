@@ -3,24 +3,25 @@ import * as vscode from 'vscode';
 enum ids {
 	ext = "simple-runner",
 	isWeb = ext + "." + "isWeb",
-	debug = ext + "_debug",
 	enableRunButton = ext + "." + "enableRunButton",
 	enableMarkdownCodeLens = ext + "." + "enableMarkdownCodeLens",
+	runInTerminal = ext + "." + "runInTerminal",
 	showOutputBeforeRun = ext + "." + "showOutputBeforeRun",
 	clearOutputBeforeRun = ext + "." + "clearOutputBeforeRun",
+	showDebugInfo = ext + "." + "showDebugInfo",
 	runnerMap = ext + "." + "runnerMap",
 	runFile = ext + "." + "runFile",
 	stopTask = ext + "." + "stopTask",
-	supportedLanguages = ext + "." + "supportedLanguages",
 	copyCodeBlock = ext + "." + "copyCodeBlock",
 	runCodeBlock = ext + "." + "runCodeBlock",
+	supportedLanguages = ext + "." + "supportedLanguages",
 	tasks = ext + "." + "tasks",
-	runInTerminal = ext + "." + "runInTerminal",
 	toggleEnableRunButton = ext + "." + "toggleEnableRunButton",
 	toggleEnableMarkdownCodeLens = ext + "." + "toggleEnableMarkdownCodeLens",
 	toggleRunInTerminal = ext + "." + "toggleRunInTerminal",
 	toggleClearOutputBeforeRun = ext + "." + "toggleClearOutputBeforeRun",
 	toggleShowOutputBeforeRun = ext + "." + "toggleShowOutputBeforeRun",
+	toggleShowDebugInfo = ext + "." + "toggleShowDebugInfo",
 }
 
 const isWeb: boolean = typeof process === 'undefined'
@@ -29,8 +30,7 @@ vscode.commands.executeCommand('setContext', ids.isWeb, isWeb);
 const getConfig: () => any = () => vscode.workspace.getConfiguration();
 const getrunnerMap: () => any = () => getConfig().get(ids.runnerMap);
 
-const debugChannel = vscode.window.createOutputChannel(ids.debug, 'log');
-const outputChannel = !isWeb ? vscode.window.createOutputChannel(ids.ext, 'log') : undefined;
+const outputChannel = vscode.window.createOutputChannel(ids.ext, 'log');
 let terminal: vscode.Terminal | null = null;
 const tasks: Map<string, any> = new Map();
 
@@ -46,6 +46,12 @@ function getFormatedDate(date: Date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
+function debug_log(msg: string) {
+	if (getConfig().get(ids.showDebugInfo)) {
+		outputChannel?.append(`${getFormatedDate(new Date())} ${msg}`);
+	}
+}
+
 function makeExtTmpDir(): string | null {
 	const { tmpdir } = require('os');
 	const path = require('path');
@@ -58,9 +64,9 @@ function makeExtTmpDir(): string | null {
 		// Create the directory if it does not exist
 		try {
 			fs.mkdirSync(extTmpDir, { recursive: true });
-			debugChannel.appendLine(`${getFormatedDate(new Date())} [info] Directory ${extTmpDir} created successfully.`);
+			debug_log(`[info] Directory ${extTmpDir} created successfully.`);
 		} catch (err) {
-			debugChannel.appendLine(`${getFormatedDate(new Date())} [error] Failed to create directory: ${err}`);
+			debug_log(` [error] Failed to create directory: ${err}`);
 			return null;
 		}
 	}
@@ -72,7 +78,7 @@ function runInTerminal(command: string, context: vscode.ExtensionContext) {
 		for (const t in vscode.window.terminals) {
 			for (const t of vscode.window.terminals) {
 				if (t.name == ids.ext) {
-					debugChannel.appendLine(`${getFormatedDate(new Date())} [info] terminal: terminal named '${ids.ext}' exists.`);
+					debug_log(`[info] terminal: terminal named '${ids.ext}' exists.`);
 					terminal = t;
 					context.subscriptions.push(terminal);
 					break;
@@ -103,15 +109,18 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 	if (getConfig().get(ids.clearOutputBeforeRun)) {
 		outputChannel?.clear();
 	}
-	outputChannel?.appendLine(`${getFormatedDate(new Date())} [info] Running ${filePath}`);
 
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: vscode.l10n.t('Running {0}', filePath),
 		cancellable: true
 	}, async (progress, token) => {
-		const startTime = new Date();
-		const childProcess = require('child_process').spawn(command, { shell: true });
+		const startTime = performance.now();
+		const childProcess = require('child_process').spawn(command, {
+			shell: true,
+			cwd: vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath))?.uri.fsPath
+		});
+		debug_log(`[info] Running ${filePath}, pid: ${childProcess.pid}, command: ${command}\n`);
 		tasks.set(filePath, childProcess);
 		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 
@@ -129,17 +138,18 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
-				const formatedDate = getFormatedDate(new Date());
+				const elapsedTimeMsg = `elapsed time: ${(performance.now() - startTime).toFixed(2)} ms\n`;
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
-					outputChannel?.append(`\n${formatedDate} [info] Child process was killed by signal: ${signal}\n`);
-					resolve(new Error(`Child process was killed by signal: ${signal}`));
+					outputChannel.append("\n");
+					debug_log(`[error] Process ${childProcess.pid} was killed by signal: ${signal}, ${elapsedTimeMsg}\n`);
+					resolve(new Error(`Process ${childProcess.pid} was killed by signal: ${signal}`));
 				} else if (code === null) {
-					outputChannel?.append(`${formatedDate} [info] Child process was killed by unknown means.\n`);
-					resolve(new Error(`Child process was killed by unknown means.`));
+					debug_log(`[error] Process ${childProcess.pid} was killed by unknown means, ${elapsedTimeMsg}\n`);
+					resolve(new Error(`Process ${childProcess.pid} was killed by unknown means.`));
 				} else {
-					outputChannel?.append(`${formatedDate} [info] Child process exited with code: ${code}\n`);
+					debug_log(`[${code === 0 ? 'info' : 'error'}] Process ${childProcess.pid} exited with code: ${code}, ${elapsedTimeMsg}\n`);
 					resolve('Done');
 				}
 			});
@@ -198,7 +208,7 @@ async function runCodeBlock(codeBlock: any, context: vscode.ExtensionContext) {
 	try {
 		fs.writeFileSync(filePath, codeBlock.content);
 	} catch (err) {
-		debugChannel.appendLine(`${getFormatedDate(new Date())} [error] Failed to write to file: ${err}`);
+		debug_log(` [error] Failed to write to file: ${err}`);
 		return;
 	}
 
@@ -344,7 +354,7 @@ function initRunButton(context: vscode.ExtensionContext) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
-	debugChannel.appendLine(`${getFormatedDate(new Date())} [info] isWeb: ${isWeb}`);
+	debug_log(`[info] isWeb: ${isWeb}\n`);
 	initMarkdownCodeLens(context);
 	if (!isWeb) {
 		initRunButton(context);
@@ -375,6 +385,7 @@ export function activate(context: vscode.ExtensionContext) {
 		toggleMap.set(ids.toggleRunInTerminal, ids.runInTerminal);
 		toggleMap.set(ids.toggleClearOutputBeforeRun, ids.clearOutputBeforeRun);
 		toggleMap.set(ids.toggleShowOutputBeforeRun, ids.showOutputBeforeRun);
+		toggleMap.set(ids.toggleShowDebugInfo, ids.showDebugInfo);
 
 		toggleMap.forEach((value, key) => {
 			context.subscriptions.push(vscode.commands.registerCommand(key, (file) => {

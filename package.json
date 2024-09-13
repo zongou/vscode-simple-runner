@@ -78,6 +78,12 @@
 				"command": "simple-runner.toggleShowOutputBeforeRun",
 				"title": "%command.toggleShowOutputBeforeRun%",
 				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleShowDebugInfo",
+				"title": "%command.toggleShowDebugInfo%",
+				"category": "%ext.displayName%"
 			}
 		],
 		"configuration": {
@@ -113,8 +119,14 @@
 					"default": true,
 					"description": "%config.showOutputBeforeRun%"
 				},
-				"simple-runner.runnerMap": {
+				"simple-runner.showDebugInfo": {
 					"order": 5,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.showDebugInfo%"
+				},
+				"simple-runner.runnerMap": {
+					"order": 6,
 					"type": "object",
 					"default": {
 						"ahk": "autohotkey \"{file}\"",

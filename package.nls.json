@@ -8,10 +8,12 @@
     "command.toggleRunInTerminal": "Toggle Run in Terminal.",
     "command.toggleClearOutputBeforeRun": "Toggle Clear Output before Run.",
     "command.toggleShowOutputBeforeRun": "Toggle Show Output before Run.",
+    "command.toggleShowDebugInfo": "Toggle Show Debug Infomation.",
     "config.enableMarkdownCodeLens": "Enable markdown codelens.",
     "config.enableRunButton": "Enable run button.",
     "config.runInTerminal": "Run in terminal.",
     "config.clearOutputBeforeRun": "Clear output before run.",
     "config.showOutputBeforeRun": "Show output before run.",
+    "config.showDebugInfo": "Show debug infomation in ouput channel.",
     "config.runnerMap": "Runner map by language, available variables: {file}, {fileDir}, {fileBasename}, {fileBasenameNoExtension}, {fileExtname}, {pathSep}, {extTmpDir}"
 }
