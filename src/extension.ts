@@ -109,11 +109,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 	if (getConfig().get(ids.clearOutputBeforeRun)) {
 		outputChannel?.clear();
 	}
-
-	/* 
-	Get the current workspace folder from filePath or the active editor
-	*/
-
+	
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: vscode.l10n.t('Running {0}', filePath),
@@ -122,9 +118,22 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		const startTime = performance.now();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
-			cwd: vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath)) ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath))?.uri.fsPath :
-				vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor?.document.uri) :
-					undefined
+			cwd: (() => {
+				const folder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath));
+				if (folder) {
+					return folder.uri.fsPath;
+				}
+
+				const activeEditor = vscode.window.activeTextEditor;
+				if (activeEditor) {
+					const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
+					if (folder) {
+						return folder.uri.fsPath;
+					}
+				}
+
+				return undefined;
+			})()
 		});
 		debug_log(`[info] Running ${filePath}, pid: ${childProcess.pid}, command: ${command}\n`);
 		tasks.set(filePath, childProcess);
@@ -221,36 +230,6 @@ async function runCodeBlock(codeBlock: any, context: vscode.ExtensionContext) {
 	runFile(filePath, codeBlock.language.languageId, context);
 }
 
-function getLanguageByCodeBlockType(codeBlockType: string): { languageId: string, fileExtName: string } {
-	const codeBlockTypeLowerCased = codeBlockType.toLowerCase();
-	switch (codeBlockTypeLowerCased) {
-		case 'sh':
-		case 'shell':
-		case 'bash':
-			return { languageId: 'shellscript', fileExtName: '.sh' }
-		case 'cpp':
-		case 'c++':
-			return { languageId: 'cpp', fileExtName: '.cpp' }
-		case 'go':
-		case 'golang':
-			return { languageId: 'go', fileExtName: '.go' }
-		case 'javascript':
-		case 'js':
-			return { languageId: 'javascript', fileExtName: '.js' }
-		case 'python':
-		case 'py':
-			return { languageId: 'python', fileExtName: '.py' }
-		case 'rust':
-		case 'rs':
-			return { languageId: 'rust', fileExtName: '.rs' }
-		case 'typescript':
-		case 'ts':
-			return { languageId: 'typescript', fileExtName: '.ts' }
-		default:
-			return { languageId: codeBlockTypeLowerCased, fileExtName: '.' + codeBlockTypeLowerCased };
-	}
-}
-
 // Define a function to provide codelens for each code block
 function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLens[] {
 	const codeLenses: vscode.CodeLens[] = [];
@@ -292,7 +271,35 @@ function provideMarkdownCodeLenses(document: vscode.TextDocument): vscode.CodeLe
 					const codeBlock = {
 						type: codeBlockType,
 						content: codeBlockContent,
-						language: getLanguageByCodeBlockType(codeBlockType)
+						language: (() => {
+							const codeBlockTypeLowerCased = codeBlockType.toLowerCase();
+							switch (codeBlockTypeLowerCased) {
+								case 'sh':
+								case 'shell':
+								case 'bash':
+									return { languageId: 'shellscript', fileExtName: '.sh' }
+								case 'cpp':
+								case 'c++':
+									return { languageId: 'cpp', fileExtName: '.cpp' }
+								case 'go':
+								case 'golang':
+									return { languageId: 'go', fileExtName: '.go' }
+								case 'javascript':
+								case 'js':
+									return { languageId: 'javascript', fileExtName: '.js' }
+								case 'python':
+								case 'py':
+									return { languageId: 'python', fileExtName: '.py' }
+								case 'rust':
+								case 'rs':
+									return { languageId: 'rust', fileExtName: '.rs' }
+								case 'typescript':
+								case 'ts':
+									return { languageId: 'typescript', fileExtName: '.ts' }
+								default:
+									return { languageId: codeBlockTypeLowerCased, fileExtName: '.' + codeBlockTypeLowerCased };
+							}
+						})()
 					};
 
 					// Add a codelens to Copy code block
