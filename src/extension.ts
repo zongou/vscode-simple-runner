@@ -138,7 +138,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
-				const elapsedTimeMsg = `elapsed time: ${(performance.now() - startTime).toFixed(2)} ms\n`;
+				const elapsedTimeMsg = `elapsed time: ${(performance.now() - startTime).toFixed(2)} ms`;
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
