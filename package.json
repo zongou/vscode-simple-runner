@@ -2,7 +2,7 @@
 	"name": "simple-runner",
 	"displayName": "%ext.displayName%",
 	"description": "%ext.description%",
-	"version": "0.0.41",
+	"version": "0.0.42",
 	"publisher": "zongou",
 	"repository": "https://github.com/zongou/vscode-simple-runner",
 	"engines": {
