@@ -118,7 +118,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		const startTime = performance.now();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
-			cwd: vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath))?.uri.fsPath
+			cwd: vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)?.uri.fsPath : undefined
 		});
 		debug_log(`[info] Running ${filePath}, pid: ${childProcess.pid}, command: ${command}\n`);
 		tasks.set(filePath, childProcess);
