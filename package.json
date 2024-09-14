@@ -116,6 +116,13 @@
 				"simple-runner.runnerMap": {
 					"order": 6,
 					"type": "object",
+					"patternProperties": {
+						"^.+$": {
+							"type": "string",
+							"minLength": 0
+						}
+					},
+					"additionalProperties": false,
 					"default": {
 						"ahk": "autohotkey \"{file}\"",
 						"applescript": "osascript \"{file}\"",
