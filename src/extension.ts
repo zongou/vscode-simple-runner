@@ -114,7 +114,6 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		cancellable: true
 	}, async (progress, token) => {
 		const startTimeFormatted = getFormatedDate(new Date());
-		const startTime = process.hrtime();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
 			cwd: (() => {
@@ -153,22 +152,19 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
-				const endTime = process.hrtime(startTime);
-				const [seconds, nanoseconds] = endTime;
-				const elapsedTimeInMs = (seconds * 1e3 + nanoseconds / 1e6).toFixed(2);
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
-					const msg = `[error] ${processMsg} Killed by signal: ${signal} in ${elapsedTimeInMs} ms\n`;
+					const msg = `[error] ${processMsg} Killed by signal: ${signal}\n`;
 					outputChannel.append("\n");
 					debug_log(msg);
 					resolve(msg);
 				} else if (code === null) {
-					const msg = `${processMsg} Killed by unknown means in ${elapsedTimeInMs} ms\n`;
+					const msg = `${processMsg} Killed by unknown means\n`;
 					debug_log(msg);
 					resolve(msg);
 				} else {
-					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code} in ${elapsedTimeInMs} ms\n`;
+					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code}\n`;
 					debug_log(msg);
 					resolve(msg);
 				}
