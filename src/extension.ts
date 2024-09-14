@@ -44,9 +44,9 @@ function getFormatedDate(date: Date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-function debug_log(msg: string) {
+function debug_log(msg: string, witTimeStamp: boolean = true) {
 	if (getConfig().get(ids.showDebugInfo)) {
-		outputChannel?.append(`${getFormatedDate(new Date())} ${msg}`);
+		outputChannel.append(witTimeStamp ? `${getFormatedDate(new Date())} ${msg}` : `${msg}`);
 	}
 }
 
@@ -113,7 +113,8 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		title: vscode.l10n.t('Running {0}', filePath),
 		cancellable: true
 	}, async (progress, token) => {
-		const startTime = performance.now();
+		const startTimeFormatted = getFormatedDate(new Date());
+		const startTime = process.hrtime();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
 			cwd: (() => {
@@ -134,7 +135,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 			})()
 		});
 		const processMsg = `[PID:${childProcess.pid}]`;
-		debug_log(`[info] ${processMsg} Running: ${command}\n`);
+		debug_log(`${startTimeFormatted} [info] ${processMsg} Running: ${command}\n`, false);
 		tasks.set(filePath, childProcess);
 		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 
@@ -152,20 +153,22 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
-				const elapsedTime = (performance.now() - startTime).toFixed(1)
+				const endTime = process.hrtime(startTime);
+				const [seconds, nanoseconds] = endTime;
+				const elapsedTimeInMs = (seconds * 1e3 + nanoseconds / 1e6).toFixed(2);
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
-					const msg = `[error] ${processMsg} Killed by signal: ${signal} in ${elapsedTime} ms\n`;
+					const msg = `[error] ${processMsg} Killed by signal: ${signal} in ${elapsedTimeInMs} ms\n`;
 					outputChannel.append("\n");
 					debug_log(msg);
 					resolve(msg);
 				} else if (code === null) {
-					const msg = `${processMsg} Killed by unknown means in ${elapsedTime} ms\n`;
+					const msg = `${processMsg} Killed by unknown means in ${elapsedTimeInMs} ms\n`;
 					debug_log(msg);
 					resolve(msg);
 				} else {
-					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code} in ${elapsedTime} ms\n`;
+					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code} in ${elapsedTimeInMs} ms\n`;
 					debug_log(msg);
 					resolve(msg);
 				}
