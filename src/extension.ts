@@ -6,9 +6,9 @@ enum ids {
 	enableRunButton = ext + "." + "enableRunButton",
 	enableMarkdownCodeLens = ext + "." + "enableMarkdownCodeLens",
 	runInTerminal = ext + "." + "runInTerminal",
+	showDebugInfo = ext + "." + "showDebugInfo",
 	showOutputBeforeRun = ext + "." + "showOutputBeforeRun",
 	clearOutputBeforeRun = ext + "." + "clearOutputBeforeRun",
-	showDebugInfo = ext + "." + "showDebugInfo",
 	runnerMap = ext + "." + "runnerMap",
 	runFile = ext + "." + "runFile",
 	stopTask = ext + "." + "stopTask",
@@ -16,12 +16,10 @@ enum ids {
 	runCodeBlock = ext + "." + "runCodeBlock",
 	supportedLanguages = ext + "." + "supportedLanguages",
 	tasks = ext + "." + "tasks",
-	toggleEnableRunButton = ext + "." + "toggleEnableRunButton",
-	toggleEnableMarkdownCodeLens = ext + "." + "toggleEnableMarkdownCodeLens",
 	toggleRunInTerminal = ext + "." + "toggleRunInTerminal",
+	toggleShowDebugInfo = ext + "." + "toggleShowDebugInfo",
 	toggleClearOutputBeforeRun = ext + "." + "toggleClearOutputBeforeRun",
 	toggleShowOutputBeforeRun = ext + "." + "toggleShowOutputBeforeRun",
-	toggleShowDebugInfo = ext + "." + "toggleShowDebugInfo",
 }
 
 const isWeb: boolean = typeof process === 'undefined'
@@ -397,12 +395,10 @@ export function activate(context: vscode.ExtensionContext) {
 		}));
 
 		const toggleMap = new Map();
-		toggleMap.set(ids.toggleEnableRunButton, ids.enableRunButton);
-		toggleMap.set(ids.toggleEnableMarkdownCodeLens, ids.enableMarkdownCodeLens);
 		toggleMap.set(ids.toggleRunInTerminal, ids.runInTerminal);
+		toggleMap.set(ids.toggleShowDebugInfo, ids.showDebugInfo);
 		toggleMap.set(ids.toggleClearOutputBeforeRun, ids.clearOutputBeforeRun);
 		toggleMap.set(ids.toggleShowOutputBeforeRun, ids.showOutputBeforeRun);
-		toggleMap.set(ids.toggleShowDebugInfo, ids.showDebugInfo);
 
 		toggleMap.forEach((value, key) => {
 			context.subscriptions.push(vscode.commands.registerCommand(key, (file) => {

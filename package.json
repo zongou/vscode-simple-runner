@@ -51,20 +51,14 @@
 			},
 			{
 				"enablement": "!simple-runner.isWeb",
-				"command": "simple-runner.toggleEnableRunButton",
-				"title": "%command.toggleEnableRunButton%",
-				"category": "%ext.displayName%"
-			},
-			{
-				"enablement": "!simple-runner.isWeb",
-				"command": "simple-runner.toggleEnableMarkdownCodeLens",
-				"title": "%command.toggleEnableMarkdownCodeLens%",
-				"category": "%ext.displayName%"
-			},
-			{
-				"enablement": "!simple-runner.isWeb",
 				"command": "simple-runner.toggleRunInTerminal",
 				"title": "%command.toggleRunInTerminal%",
+				"category": "%ext.displayName%"
+			},
+			{
+				"enablement": "!simple-runner.isWeb",
+				"command": "simple-runner.toggleShowDebugInfo",
+				"title": "%command.toggleShowDebugInfo%",
 				"category": "%ext.displayName%"
 			},
 			{
@@ -77,12 +71,6 @@
 				"enablement": "!simple-runner.isWeb",
 				"command": "simple-runner.toggleShowOutputBeforeRun",
 				"title": "%command.toggleShowOutputBeforeRun%",
-				"category": "%ext.displayName%"
-			},
-			{
-				"enablement": "!simple-runner.isWeb",
-				"command": "simple-runner.toggleShowDebugInfo",
-				"title": "%command.toggleShowDebugInfo%",
 				"category": "%ext.displayName%"
 			}
 		],
@@ -107,23 +95,23 @@
 					"default": false,
 					"description": "%config.runInTerminal%"
 				},
-				"simple-runner.clearOutputBeforeRun": {
+				"simple-runner.showDebugInfo": {
 					"order": 3,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.showDebugInfo%"
+				},
+				"simple-runner.clearOutputBeforeRun": {
+					"order": 4,
 					"type": "boolean",
 					"default": false,
 					"description": "%config.clearOutputBeforeRun%"
 				},
 				"simple-runner.showOutputBeforeRun": {
-					"order": 4,
-					"type": "boolean",
-					"default": true,
-					"description": "%config.showOutputBeforeRun%"
-				},
-				"simple-runner.showDebugInfo": {
 					"order": 5,
 					"type": "boolean",
 					"default": true,
-					"description": "%config.showDebugInfo%"
+					"description": "%config.showOutputBeforeRun%"
 				},
 				"simple-runner.runnerMap": {
 					"order": 6,
