@@ -188,6 +188,23 @@
 			}
 		}
 	},
+	"capabilities": {
+		"virtualWorkspaces": true,
+		"untrustedWorkspaces": {
+			"supported": "limited",
+			"description": "%ext.capabilities.untrustedWorkspaces.description%",
+			"restrictedConfigurations": [
+				"prettier.documentSelectors",
+				"prettier.resolveGlobalModules",
+				"prettier.ignorePath",
+				"prettier.prettierPath",
+				"prettier.configPath",
+				"prettier.useEditorConfig",
+				"prettier.resolveGlobalModules",
+				"prettier.withNodeModules"
+			]
+		}
+	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",

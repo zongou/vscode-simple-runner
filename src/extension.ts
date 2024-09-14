@@ -62,9 +62,9 @@ function makeExtTmpDir(): string | null {
 		// Create the directory if it does not exist
 		try {
 			fs.mkdirSync(extTmpDir, { recursive: true });
-			debug_log(`[info] Directory ${extTmpDir} created successfully.`);
+			debug_log(`[info] Directory ${extTmpDir} created successfully.\n`);
 		} catch (err) {
-			debug_log(` [error] Failed to create directory: ${err}`);
+			debug_log(`[error] Failed to create directory: ${err}\n`);
 			return null;
 		}
 	}
@@ -76,7 +76,7 @@ function runInTerminal(command: string, context: vscode.ExtensionContext) {
 		for (const t in vscode.window.terminals) {
 			for (const t of vscode.window.terminals) {
 				if (t.name == ids.ext) {
-					debug_log(`[info] terminal: terminal named '${ids.ext}' exists.`);
+					debug_log(`[info] terminal: terminal named '${ids.ext}' exists.\n`);
 					terminal = t;
 					context.subscriptions.push(terminal);
 					break;
@@ -225,7 +225,7 @@ async function runCodeBlock(codeBlock: any, context: vscode.ExtensionContext) {
 	try {
 		fs.writeFileSync(filePath, codeBlock.content);
 	} catch (err) {
-		debug_log(` [error] Failed to write to file: ${err}`);
+		debug_log(` [error] Failed to write to file: ${err}\n`);
 		return;
 	}
 
