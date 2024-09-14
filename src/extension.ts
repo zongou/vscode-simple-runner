@@ -110,6 +110,10 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		outputChannel?.clear();
 	}
 
+	/* 
+	Get the current workspace folder from filePath or the active editor
+	*/
+
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: vscode.l10n.t('Running {0}', filePath),
@@ -118,7 +122,9 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		const startTime = performance.now();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
-			cwd: vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri)?.uri.fsPath : undefined
+			cwd: vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath)) ? vscode.workspace.getWorkspaceFolder(vscode.Uri.file(filePath))?.uri.fsPath :
+				vscode.window.activeTextEditor ? vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor?.document.uri) :
+					undefined
 		});
 		debug_log(`[info] Running ${filePath}, pid: ${childProcess.pid}, command: ${command}\n`);
 		tasks.set(filePath, childProcess);
