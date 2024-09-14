@@ -109,7 +109,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 	if (getConfig().get(ids.clearOutputBeforeRun)) {
 		outputChannel?.clear();
 	}
-	
+
 	await vscode.window.withProgress({
 		location: vscode.ProgressLocation.Notification,
 		title: vscode.l10n.t('Running {0}', filePath),
@@ -135,7 +135,8 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 				return undefined;
 			})()
 		});
-		debug_log(`[info] Running ${filePath}, pid: ${childProcess.pid}, command: ${command}\n`);
+		const processMsg = `[PID:${childProcess.pid}]`;
+		debug_log(`[info] ${processMsg} Running: ${command}\n`);
 		tasks.set(filePath, childProcess);
 		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 
@@ -153,19 +154,22 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
-				const elapsedTimeMsg = `elapsed time: ${(performance.now() - startTime).toFixed(2)} ms`;
+				const elapsedTime = (performance.now() - startTime).toFixed(1)
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
+					const msg = `[error] ${processMsg} Killed by signal: ${signal} in ${elapsedTime} ms\n`;
 					outputChannel.append("\n");
-					debug_log(`[error] Process ${childProcess.pid} was killed by signal: ${signal}, ${elapsedTimeMsg}\n`);
-					resolve(new Error(`Process ${childProcess.pid} was killed by signal: ${signal}`));
+					debug_log(msg);
+					resolve(msg);
 				} else if (code === null) {
-					debug_log(`[error] Process ${childProcess.pid} was killed by unknown means, ${elapsedTimeMsg}\n`);
-					resolve(new Error(`Process ${childProcess.pid} was killed by unknown means.`));
+					const msg = `${processMsg} Killed by unknown means in ${elapsedTime} ms\n`;
+					debug_log(msg);
+					resolve(msg);
 				} else {
-					debug_log(`[${code === 0 ? 'info' : 'error'}] Process ${childProcess.pid} exited with code: ${code}, ${elapsedTimeMsg}\n`);
-					resolve('Done');
+					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code} in ${elapsedTime} ms\n`;
+					debug_log(msg);
+					resolve(msg);
 				}
 			});
 		});
