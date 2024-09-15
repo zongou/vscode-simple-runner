@@ -158,8 +158,9 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 			childProcess.on('close', (code: null, signal: any) => {
 				const endTime = process.hrtime(startTime);
 				const [seconds, nanoseconds] = endTime;
-				const elapsedTimeInMs = (seconds * 1e3) + (nanoseconds / 1e6).toFixed(2);
+				const elapsedTimeInMs = (seconds * 1e3 + nanoseconds / 1e6).toFixed(2);
 				const elapsedTimeMsg = getConfig().get(ids.showElapsedTimeInDebugInfo) ? ` in ${elapsedTimeInMs} ms` : '';
+
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
