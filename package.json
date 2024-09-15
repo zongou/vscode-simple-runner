@@ -105,19 +105,19 @@
 					"order": 5,
 					"type": "boolean",
 					"default": true,
-					"description": "%config.showDebugInfo%"
+					"markdownDescription": "%config.showDebugInfo%"
 				},
 				"simple-runner.showTimestampInDebugInfo": {
 					"order": 6,
 					"type": "boolean",
 					"default": false,
-					"description": "%config.showTimestampInDebugInfo%"
+					"markdownDescription": "%config.showTimestampInDebugInfo%"
 				},
 				"simple-runner.showElapsedTimeInDebugInfo": {
 					"order": 7,
 					"type": "boolean",
 					"default": false,
-					"description": "%config.showElapsedTimeInDebugInfo%"
+					"markdownDescription": "%config.showElapsedTimeInDebugInfo%"
 				},
 				"simple-runner.runnerMap": {
 					"order": 8,

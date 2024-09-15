@@ -9,9 +9,9 @@
     "config.enableRunButton": "Enable run button.",
     "config.enableMarkdownCodeLens": "Enable markdown codelens.",
     "config.runInTerminal": "Run in terminal.",
-    "config.showDebugInfo": "Show debug infomation in ouput channel.",
-    "config.showTimestampInDebugInfo": "Show timestamp in debug infomation.",
-    "config.showElapsedTimeInDebugInfo": "Show elapsed time in debug infomation.",
+    "config.showDebugInfo": "Show debug infomation in ouput channel.  \nWhen enabled:\n```log\n[info] [PID:123456] Running: chmod +x \"/tmp/hello.sh\" && \"/tmp/hello.sh\"\nHello World\n[info] [PID:123456] Exited with code: 0\n```\nWhen disabled:\n```log\nHello World\n```",
+    "config.showTimestampInDebugInfo": "Show timestamp in debug infomation.  \nWhen enabled:\n```log\n2024-09-15 18:54:44.356 [info] [PID:123456] Exited with code: 0\n```\nWhen disabled:\n```log\n[info] [PID:123456] Exited with code: 0\n```",
+    "config.showElapsedTimeInDebugInfo": "Show elapsed time in debug infomation.  \nWhen enabled:\n```log\n[info] [PID:123456] Exited with code: 0 in 00.01 ms\n```\nWhen disabled:\n```log\n[info] [PID:123456] Exited with code: 0\n```\n",
     "config.clearOutputBeforeRun": "Clear output before run.",
     "config.showOutputBeforeRun": "Show output before run.",
     "config.runnerMap": "Runner Map by Language  \nThe following predefined variables are supported:\n\n- **${file}** - the current opened file\n- **${fileBasename}** - the current opened file's basename\n- **${fileBasenameNoExtension}** - the current opened file's basename with no file extension\n- **${fileExtname}** - the current opened file's extension\n- **${fileDirname}** - the current opened file's folder path\n- **${fileDirnameBasename}** - the current opened file's folder name\n- **${pathSeparator}** - the character used by the operating system to separate components in file paths\n- **${extTmpDir}** - the extension temporay folder"
