@@ -1,6 +1,6 @@
 {
 	"name": "simple-runner",
-	"displayName": "%ext.displayName%",
+	"displayName": "%ext.title%",
 	"description": "%ext.description%",
 	"version": "0.0.47",
 	"publisher": "zongou",
@@ -40,42 +40,36 @@
 				"command": "simple-runner.runFile",
 				"title": "%command.runFile%",
 				"icon": "$(debug-start)",
-				"category": "%ext.displayName%"
+				"category": "%ext.title%"
 			},
 			{
 				"enablement": "resourcePath in simple-runner.tasks",
 				"command": "simple-runner.stopTask",
 				"title": "%command.stopTask%",
 				"icon": "$(debug-stop)",
-				"category": "%ext.displayName%"
+				"category": "%ext.title%"
 			},
 			{
 				"enablement": "!simple-runner.isWeb",
 				"command": "simple-runner.toggleRunInTerminal",
 				"title": "%command.toggleRunInTerminal%",
-				"category": "%ext.displayName%"
-			},
-			{
-				"enablement": "!simple-runner.isWeb",
-				"command": "simple-runner.toggleShowDebugInfo",
-				"title": "%command.toggleShowDebugInfo%",
-				"category": "%ext.displayName%"
+				"category": "%ext.title%"
 			},
 			{
 				"enablement": "!simple-runner.isWeb",
 				"command": "simple-runner.toggleClearOutputBeforeRun",
 				"title": "%command.toggleClearOutputBeforeRun%",
-				"category": "%ext.displayName%"
+				"category": "%ext.title%"
 			},
 			{
 				"enablement": "!simple-runner.isWeb",
-				"command": "simple-runner.toggleShowOutputBeforeRun",
-				"title": "%command.toggleShowOutputBeforeRun%",
-				"category": "%ext.displayName%"
+				"command": "simple-runner.toggleShowDebugInfo",
+				"title": "%command.toggleShowDebugInfo%",
+				"category": "%ext.title%"
 			}
 		],
 		"configuration": {
-			"title": "%ext.displayName%",
+			"title": "%ext.title%",
 			"properties": {
 				"simple-runner.enableRunButton": {
 					"order": 0,
@@ -95,26 +89,38 @@
 					"default": false,
 					"description": "%config.runInTerminal%"
 				},
-				"simple-runner.showDebugInfo": {
-					"order": 3,
-					"type": "boolean",
-					"default": true,
-					"description": "%config.showDebugInfo%"
-				},
 				"simple-runner.clearOutputBeforeRun": {
-					"order": 4,
+					"order": 3,
 					"type": "boolean",
 					"default": false,
 					"description": "%config.clearOutputBeforeRun%"
 				},
 				"simple-runner.showOutputBeforeRun": {
-					"order": 5,
+					"order": 4,
 					"type": "boolean",
 					"default": true,
 					"description": "%config.showOutputBeforeRun%"
 				},
-				"simple-runner.runnerMap": {
+				"simple-runner.showDebugInfo": {
+					"order": 5,
+					"type": "boolean",
+					"default": true,
+					"description": "%config.showDebugInfo%"
+				},
+				"simple-runner.showTimestampInDebugInfo": {
 					"order": 6,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.showTimestampInDebugInfo%"
+				},
+				"simple-runner.showElapsedTimeInDebugInfo": {
+					"order": 7,
+					"type": "boolean",
+					"default": false,
+					"description": "%config.showElapsedTimeInDebugInfo%"
+				},
+				"simple-runner.runnerMap": {
+					"order": 8,
 					"type": "object",
 					"patternProperties": {
 						"^.+$": {
@@ -124,66 +130,66 @@
 					},
 					"additionalProperties": false,
 					"default": {
-						"ahk": "autohotkey \"{file}\"",
-						"applescript": "osascript \"{file}\"",
-						"autoit": "autoit3 \"{file}\"",
-						"awk": "awk -f \"{file}\"",
-						"bat": "\"{file}\"",
-						"c": "cc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"clojure": "lein exec \"{file}\"",
-						"coffeescript": "coffee \"{file}\"",
-						"cpp": "c++ \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"crystal": "crystal \"{file}\"",
-						"csharp": "scriptcs \"{file}\"",
-						"d": "dmd \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"dart": "dart \"{file}\"",
-						"erlang": "escript \"{file}\"",
-						"fortran_fixed-form": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"fortran-modern": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"fortran": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"FortranFreeForm": "gfortran \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"fsharp": "fsi \"{file}\"",
-						"gleam": "gleam run -m \"{fileDirname}{pathSep}{fileBasenameNoExtension}\"",
-						"go": "go run \"{file}\"",
-						"groovy": "groovy \"{file}\"",
-						"haskell": "runghc \"{file}\"",
-						"haxe": "haxe --cwd {fileDir} --run \"{fileBasenameNoExtension}\"",
-						"java": "java \"{file}\"",
-						"javascript": "node \"{file}\"",
-						"julia": "julia \"{file}\"",
-						"kit": "kitc --run \"{file}\"",
-						"less": "lessc \"{file}\" \"{extTmpDir}{pathSep}{fileBasenameNoExtension}.css\"",
-						"lisp": "sbcl --script \"{file}\"",
-						"lua": "lua \"{file}\"",
-						"mojo": "mojo run \"{file}\"",
-						"nim": "nim compile --verbosity:0 --hints:off --run \"{file}\"",
-						"objective-c": "gcc -framework Cocoa \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"ocaml": "ocaml \"{file}\"",
-						"pascal": "fpc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"perl": "perl \"{file}\"",
-						"perl6": "perl6 \"{file}\"",
-						"php": "php \"{file}\"",
-						"pkl": "pkl eval -f yaml \"{file}\" -o \"{extTmpDir}{pathSep}{fileBasenameNoExtension}.yaml\"",
-						"powershell": "powershell -ExecutionPolicy ByPass -File \"{file}\"",
-						"python": "python -u \"{file}\"",
-						"r": "Rscript \"{file}\"",
-						"racket": "racket \"{file}\"",
-						"ruby": "ruby \"{file}\"",
-						"rust": "rustc \"{file}\" -o \"{extTmpDir}{pathSep}a\" && \"{extTmpDir}{pathSep}a\"",
-						"sass": "sass --style expanded \"{file}\"",
-						"scala": "scala \"{file}\"",
-						"scheme": "csi -script \"{file}\"",
-						"scss": "scss --style expanded \"{file}\"",
-						"shellscript": "chmod +x \"{file}\" && \"{file}\"",
-						"sml": "sml \"{file}\"",
-						"spwn": "spwn build \"{file}\"",
-						"swift": "swift \"{file}\"",
-						"typescript": "ts-node \"{file}\"",
-						"v": "v run \"{file}\"",
-						"vbscript": "cscript //Nologo \"{file}\"",
-						"zig": "zig run \"{file}\""
+						"ahk": "autohotkey \"${file}\"",
+						"applescript": "osascript \"${file}\"",
+						"autoit": "autoit3 \"${file}\"",
+						"awk": "awk -f \"${file}\"",
+						"bat": "\"${file}\"",
+						"c": "cc \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"clojure": "lein exec \"${file}\"",
+						"coffeescript": "coffee \"${file}\"",
+						"cpp": "c++ \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"crystal": "crystal \"${file}\"",
+						"csharp": "scriptcs \"${file}\"",
+						"d": "dmd \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"dart": "dart \"${file}\"",
+						"erlang": "escript \"${file}\"",
+						"fortran_fixed-form": "gfortran \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"fortran-modern": "gfortran \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"fortran": "gfortran \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"FortranFreeForm": "gfortran \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"fsharp": "fsi \"${file}\"",
+						"gleam": "gleam run -m \"${fileDirnamename}${pathSeparator}${fileBasenameNoExtension}\"",
+						"go": "go run \"${file}\"",
+						"groovy": "groovy \"${file}\"",
+						"haskell": "runghc \"${file}\"",
+						"haxe": "haxe --cwd ${fileDirname} --run \"${fileBasenameNoExtension}\"",
+						"java": "java \"${file}\"",
+						"javascript": "node \"${file}\"",
+						"julia": "julia \"${file}\"",
+						"kit": "kitc --run \"${file}\"",
+						"less": "lessc \"${file}\" \"${extTmpDir}${pathSeparator}${fileBasenameNoExtension}.css\"",
+						"lisp": "sbcl --script \"${file}\"",
+						"lua": "lua \"${file}\"",
+						"mojo": "mojo run \"${file}\"",
+						"nim": "nim compile --verbosity:0 --hints:off --run \"${file}\"",
+						"objective-c": "gcc -framework Cocoa \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"ocaml": "ocaml \"${file}\"",
+						"pascal": "fpc \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"perl": "perl \"${file}\"",
+						"perl6": "perl6 \"${file}\"",
+						"php": "php \"${file}\"",
+						"pkl": "pkl eval -f yaml \"${file}\" -o \"${extTmpDir}${pathSeparator}${fileBasenameNoExtension}.yaml\"",
+						"powershell": "powershell -ExecutionPolicy ByPass -File \"${file}\"",
+						"python": "python -u \"${file}\"",
+						"r": "Rscript \"${file}\"",
+						"racket": "racket \"${file}\"",
+						"ruby": "ruby \"${file}\"",
+						"rust": "rustc \"${file}\" -o \"${extTmpDir}${pathSeparator}a\" && \"${extTmpDir}${pathSeparator}a\"",
+						"sass": "sass --style expanded \"${file}\"",
+						"scala": "scala \"${file}\"",
+						"scheme": "csi -script \"${file}\"",
+						"scss": "scss --style expanded \"${file}\"",
+						"shellscript": "chmod +x \"${file}\" && \"${file}\"",
+						"sml": "sml \"${file}\"",
+						"spwn": "spwn build \"${file}\"",
+						"swift": "swift \"${file}\"",
+						"typescript": "ts-node \"${file}\"",
+						"v": "v run \"${file}\"",
+						"vbscript": "cscript //Nologo \"${file}\"",
+						"zig": "zig run \"${file}\""
 					},
-					"description": "%config.runnerMap%"
+					"markdownDescription": "%config.runnerMap%"
 				}
 			}
 		}

@@ -1,25 +1,27 @@
 import * as vscode from 'vscode';
 
 enum ids {
-	ext = "simple-runner",
-	isWeb = ext + "." + "isWeb",
-	enableRunButton = ext + "." + "enableRunButton",
-	enableMarkdownCodeLens = ext + "." + "enableMarkdownCodeLens",
-	runInTerminal = ext + "." + "runInTerminal",
-	showDebugInfo = ext + "." + "showDebugInfo",
-	showOutputBeforeRun = ext + "." + "showOutputBeforeRun",
-	clearOutputBeforeRun = ext + "." + "clearOutputBeforeRun",
-	runnerMap = ext + "." + "runnerMap",
-	runFile = ext + "." + "runFile",
-	stopTask = ext + "." + "stopTask",
-	copyCodeBlock = ext + "." + "copyCodeBlock",
-	runCodeBlock = ext + "." + "runCodeBlock",
-	supportedLanguages = ext + "." + "supportedLanguages",
-	tasks = ext + "." + "tasks",
-	toggleRunInTerminal = ext + "." + "toggleRunInTerminal",
-	toggleShowDebugInfo = ext + "." + "toggleShowDebugInfo",
-	toggleClearOutputBeforeRun = ext + "." + "toggleClearOutputBeforeRun",
-	toggleShowOutputBeforeRun = ext + "." + "toggleShowOutputBeforeRun",
+	extId = "simple-runner",
+	extTitle = "Simple Runner",
+	isWeb = extId + "." + "isWeb",
+	enableRunButton = extId + "." + "enableRunButton",
+	enableMarkdownCodeLens = extId + "." + "enableMarkdownCodeLens",
+	runInTerminal = extId + "." + "runInTerminal",
+	clearOutputBeforeRun = extId + "." + "clearOutputBeforeRun",
+	showOutputBeforeRun = extId + "." + "showOutputBeforeRun",
+	showDebugInfo = extId + "." + "showDebugInfo",
+	showTimestampInDebugInfo = extId + "." + "showTimestampInDebugInfo",
+	showElapsedTimeInDebugInfo = extId + "." + "showElapsedTimeInDebugInfo",
+	runnerMap = extId + "." + "runnerMap",
+	runFile = extId + "." + "runFile",
+	stopTask = extId + "." + "stopTask",
+	copyCodeBlock = extId + "." + "copyCodeBlock",
+	runCodeBlock = extId + "." + "runCodeBlock",
+	supportedLanguages = extId + "." + "supportedLanguages",
+	tasks = extId + "." + "tasks",
+	toggleRunInTerminal = extId + "." + "toggleRunInTerminal",
+	toggleClearOutputBeforeRun = extId + "." + "toggleClearOutputBeforeRun",
+	toggleShowDebugInfo = extId + "." + "toggleShowDebugInfo",
 }
 
 const isWeb: boolean = typeof process === 'undefined'
@@ -28,7 +30,7 @@ vscode.commands.executeCommand('setContext', ids.isWeb, isWeb);
 const getConfig: () => any = () => vscode.workspace.getConfiguration();
 const getrunnerMap: () => any = () => getConfig().get(ids.runnerMap);
 
-const outputChannel = vscode.window.createOutputChannel(ids.ext, 'log');
+const outputChannel = vscode.window.createOutputChannel(ids.extTitle, 'log');
 let terminal: vscode.Terminal | null = null;
 const tasks: Map<string, any> = new Map();
 
@@ -44,9 +46,9 @@ function getFormatedDate(date: Date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
-function debug_log(msg: string, witTimeStamp: boolean = true) {
+function debug_log(msg: string, timeStamp: string = getFormatedDate(new Date())) {
 	if (getConfig().get(ids.showDebugInfo)) {
-		outputChannel.append(witTimeStamp ? `${getFormatedDate(new Date())} ${msg}` : `${msg}`);
+		outputChannel.append(getConfig().get(ids.showTimestampInDebugInfo) ? `${timeStamp} ${msg}` : `${msg}`);
 	}
 }
 
@@ -55,7 +57,7 @@ function makeExtTmpDir(): string | null {
 	const path = require('path');
 	const fs = require('fs');
 
-	const extTmpDir = path.join(tmpdir(), ids.ext);
+	const extTmpDir = path.join(tmpdir(), ids.extId);
 
 	// Check if the directory exists
 	if (!fs.existsSync(extTmpDir)) {
@@ -72,11 +74,12 @@ function makeExtTmpDir(): string | null {
 }
 
 function runInTerminal(command: string, context: vscode.ExtensionContext) {
+	const terminalName = ids.extTitle;
 	if (!terminal) {
 		for (const t in vscode.window.terminals) {
 			for (const t of vscode.window.terminals) {
-				if (t.name == ids.ext) {
-					debug_log(`[info] terminal: terminal named '${ids.ext}' exists.\n`);
+				if (t.name == terminalName) {
+					debug_log(`[info] terminal: terminal named '${terminalName}' exists.\n`);
 					terminal = t;
 					context.subscriptions.push(terminal);
 					break;
@@ -86,7 +89,7 @@ function runInTerminal(command: string, context: vscode.ExtensionContext) {
 	}
 
 	if (!terminal) {
-		terminal = vscode.window.createTerminal(ids.ext);
+		terminal = vscode.window.createTerminal(terminalName);
 		context.subscriptions.push(terminal);
 	}
 
@@ -114,6 +117,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 		cancellable: true
 	}, async (progress, token) => {
 		const startTimeFormatted = getFormatedDate(new Date());
+		const startTime = process.hrtime();
 		const childProcess = require('child_process').spawn(command, {
 			shell: true,
 			cwd: (() => {
@@ -134,7 +138,7 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 			})()
 		});
 		const processMsg = `[PID:${childProcess.pid}]`;
-		debug_log(`${startTimeFormatted} [info] ${processMsg} Running: ${command}\n`, false);
+		debug_log(`[info] ${processMsg} Running: ${command}\n`, startTimeFormatted);
 		tasks.set(filePath, childProcess);
 		vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 
@@ -152,19 +156,23 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 
 		await new Promise((resolve, reject) => {
 			childProcess.on('close', (code: null, signal: any) => {
+				const endTime = process.hrtime(startTime);
+				const [seconds, nanoseconds] = endTime;
+				const elapsedTimeInMs = (seconds * 1e3) + (nanoseconds / 1e6).toFixed(2);
+				const elapsedTimeMsg = getConfig().get(ids.showElapsedTimeInDebugInfo) ? ` in ${elapsedTimeInMs} ms` : '';
 				tasks.delete(filePath);
 				vscode.commands.executeCommand('setContext', ids.tasks, Array.from(tasks.keys()));
 				if (signal) {
-					const msg = `[error] ${processMsg} Killed by signal: ${signal}\n`;
+					const msg = `[error] ${processMsg} Killed by signal: ${signal}${elapsedTimeMsg}\n`;
 					outputChannel.append("\n");
 					debug_log(msg);
 					resolve(msg);
 				} else if (code === null) {
-					const msg = `${processMsg} Killed by unknown means\n`;
+					const msg = `${processMsg} Killed by unknown means${elapsedTimeMsg}\n`;
 					debug_log(msg);
 					resolve(msg);
 				} else {
-					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code}\n`;
+					const msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code}${elapsedTimeMsg}\n`;
 					debug_log(msg);
 					resolve(msg);
 				}
@@ -173,27 +181,29 @@ async function runChildProcess(command: string, filePath: string): Promise<any> 
 	});
 }
 
+// https://github.com/Microsoft/vscode-docs/blob/main/docs/editor/variables-reference.md
 function runFile(filePath: string, languageId: string, context: vscode.ExtensionContext) {
 	const path = require('path');
 
+	const fileBasename = path.basename(filePath);
+	const fileBasenameNoExtension = fileBasename.split('.').slice(0, -1).join('.');
+	const fileExtname = filePath.split('.').slice(-1)[0];
+	const fileDirname = path.dirname(filePath);
+	const fileDirnameBasename = path.basename(fileDirname);
 	const extTmpDir = makeExtTmpDir();
 	if (!extTmpDir) {
 		return;
 	}
 
-	const fileDir = path.dirname(filePath);
-	const fileBasename = path.basename(filePath);
-	const fileBasenameNoExtension = fileBasename.split('.').slice(0, -1).join('.');
-	const fileExtname = filePath.split('.').slice(-1)[0];
-
 	const command: string = getrunnerMap()[languageId]
-		.replace(/\{file\}/g, filePath)
-		.replace(/\{fileDir\}/g, fileDir)
-		.replace(/\{fileBasename\}/g, fileBasename)
-		.replace(/\{fileBasenameNoExtension\}/g, fileBasenameNoExtension)
-		.replace(/\{fileExtname\}/g, fileExtname)
-		.replace(/\{extTmpDir\}/g, extTmpDir)
-		.replace(/\{pathSep\}/g, path.sep);
+		.replace(/\$\{file\}/g, filePath)
+		.replace(/\$\{fileBasename\}/g, fileBasename)
+		.replace(/\$\{fileBasenameNoExtension\}/g, fileBasenameNoExtension)
+		.replace(/\$\{fileExtname\}/g, fileExtname)
+		.replace(/\$\{fileDirname\}/g, fileDirname)
+		.replace(/\$\{fileDirnameBasename\}/g, fileDirnameBasename)
+		.replace(/\$\{pathSeparator\}/g, path.sep)
+		.replace(/\$\{extTmpDir\}/g, extTmpDir);
 
 	if (getConfig().get(ids.runInTerminal)) {
 		runInTerminal(command, context);
@@ -388,7 +398,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}));
 
 		context.subscriptions.push(vscode.window.onDidCloseTerminal(t => {
-			if (t.name == ids.ext) {
+			if (t.name == ids.extId) {
 				terminal = null;
 			}
 		}));
@@ -397,7 +407,6 @@ export function activate(context: vscode.ExtensionContext) {
 		toggleMap.set(ids.toggleRunInTerminal, ids.runInTerminal);
 		toggleMap.set(ids.toggleShowDebugInfo, ids.showDebugInfo);
 		toggleMap.set(ids.toggleClearOutputBeforeRun, ids.clearOutputBeforeRun);
-		toggleMap.set(ids.toggleShowOutputBeforeRun, ids.showOutputBeforeRun);
 
 		toggleMap.forEach((value, key) => {
 			context.subscriptions.push(vscode.commands.registerCommand(key, (file) => {
