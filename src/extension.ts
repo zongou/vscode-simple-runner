@@ -29,26 +29,9 @@ const isWeb: boolean = typeof process === 'undefined'
 const outputChannel = vscode.window.createOutputChannel(ids.extTitle, 'log');
 const fileTaskMap: Map<string, any> = new Map();
 
-const languageDetailsMap = new Map([
-	['ahk', { extname: '.ahk', alias: ['autohotkey'] }],
-	['bat', { extname: '.bat', alias: ['batch'] }],
-	['cpp', { extname: '.cpp', alias: ['c++'] }],
-	['csharp', { extname: '.cs', alias: ['c#'] }],
-	['fortran', { extname: '.f', alias: ['fortran_fixed-form', 'fortran_modern', 'FortranFreeForm'] }],
-	['fsharp', { extname: '.fs', alias: ['f#'] }],
-	['go', { extname: '.go', alias: ['golang'] }],
-	['javascript', { extname: '.js', alias: ['js'] }],
-	['objective-c', { extname: '.m', alias: ['objective', 'objc'] }],
-	['python', { extname: '.py', alias: ['py', 'py2', 'py3'] }],
-	['rust', { extname: '.rs', alias: ['rs'] }],
-	['shellscript', { extname: '.sh', alias: ['sh', 'shell', 'bash'] }],
-	['typescript', { extname: '.ts', alias: ['ts'] }],
-	['vb', { extname: '.vbs', alias: ['vbscript', 'vbs'] }],
-]);
-
 function getVscLangId(mdLangId: string): string {
-	for (const [vscLangId, data] of languageDetailsMap.entries()) {
-		if (data.alias.includes(mdLangId)) {
+	for (const [vscLangId, data] of Object.entries(getConfig(ids.languageDetailsMap))) {
+		if ((data as { alias: string[] }).alias.includes(mdLangId)) {
 			return vscLangId;
 		}
 	}
@@ -275,7 +258,7 @@ class Runner {
 		}
 
 		const vscLangId = getVscLangId(mdLangId);
-		const fileExtname = (vscLangId === 'fortran' && mdLangId !== 'fortran') && '.f90' || languageDetailsMap.get(vscLangId)?.extname || '.' + mdLangId;
+		const fileExtname = (vscLangId === 'fortran' && mdLangId !== 'fortran') && '.f90' || getConfig(ids.languageDetailsMap)[vscLangId]?.extname || '.' + mdLangId;
 		// Same name for same content
 		// const fileBasenameNoExtension = require('crypto').createHash('sha256').update(content).digest('hex').slice(0, 8);
 		// Just unique name
@@ -460,7 +443,7 @@ class MarkdownParser {
 
 			if (cell.kind === vscode.NotebookCellKind.Code) {
 				const indentation = cell.metadata?.raw?.indentation ?? ''
-				const languageAlias = languageDetailsMap.get(cell.languageId)?.alias[0];
+				const languageAlias = getConfig(ids.languageDetailsMap)[cell.languageId]?.alias[0];
 				const shorterName = languageAlias && languageAlias.length < cell.languageId.length ? languageAlias : cell.languageId;
 				const originMdLangId = cell.metadata?.raw?.language;
 				const mdLangId = originMdLangId && getVscLangId(originMdLangId) === cell.languageId ? originMdLangId : shorterName;

@@ -211,24 +211,125 @@
 					"markdownDescription": "%config.languageRunnerMap%"
 				},
 				"simple-runner.languageDetailsMap": {
+					"order": 8,
 					"type": "object",
-					"default": {
-						"ahk": { "extname": ".ahk", "alias": ["autohotkey"] },
-						"bat": { "extname": ".bat", "alias": ["batch"] },
-						"cpp": { "extname": ".cpp", "alias": ["c++"] },
-						"csharp": { "extname": ".cs", "alias": ["c#"] },
-						"fortran": { "extname": ".f", "alias": ["fortran_fixed-form", "fortran_modern", "FortranFreeForm"] },
-						"fsharp": { "extname": ".fs", "alias": ["f#"] },
-						"go": { "extname": ".go", "alias": ["golang"] },
-						"javascript": { "extname": ".js", "alias": ["js"] },
-						"objective-c": { "extname": ".m", "alias": ["objective", "objc"] },
-						"python": { "extname": ".py", "alias": ["py", "py2", "py3"] },
-						"rust": { "extname": ".rs", "alias": ["rs"] },
-						"shellscript": { "extname": ".sh", "alias": ["sh", "shell", "bash"] },
-						"typescript": { "extname": ".ts", "alias": ["ts"] },
-						"vb": { "extname": ".vbs", "alias": ["vbscript", "vbs"] }
+					"patternProperties": {
+						"^.+$": {
+							"type": "object",
+							"properties": {
+								"extname": {
+									"type": "string",
+									"minLength": 1
+								},
+								"alias": {
+									"type": "array",
+									"items": {
+										"type": "string",
+										"minLength": 1
+									}
+								}
+							},
+							"required": [
+								"extname"
+							],
+							"additionalProperties": false
+						}
 					},
-					"description": "Mapping of language details including file extensions and aliases."
+					"default": {
+						"ahk": {
+							"extname": ".ahk",
+							"alias": [
+								"autohotkey"
+							]
+						},
+						"bat": {
+							"extname": ".bat",
+							"alias": [
+								"batch"
+							]
+						},
+						"cpp": {
+							"extname": ".cpp",
+							"alias": [
+								"c++"
+							]
+						},
+						"csharp": {
+							"extname": ".cs",
+							"alias": [
+								"c#"
+							]
+						},
+						"fortran": {
+							"extname": ".f",
+							"alias": [
+								"fortran_fixed-form",
+								"fortran_modern",
+								"FortranFreeForm"
+							]
+						},
+						"fsharp": {
+							"extname": ".fs",
+							"alias": [
+								"f#"
+							]
+						},
+						"go": {
+							"extname": ".go",
+							"alias": [
+								"golang"
+							]
+						},
+						"javascript": {
+							"extname": ".js",
+							"alias": [
+								"js"
+							]
+						},
+						"objective-c": {
+							"extname": ".m",
+							"alias": [
+								"objective",
+								"objc"
+							]
+						},
+						"python": {
+							"extname": ".py",
+							"alias": [
+								"py",
+								"py2",
+								"py3"
+							]
+						},
+						"rust": {
+							"extname": ".rs",
+							"alias": [
+								"rs"
+							]
+						},
+						"shellscript": {
+							"extname": ".sh",
+							"alias": [
+								"sh",
+								"shell",
+								"bash"
+							]
+						},
+						"typescript": {
+							"extname": ".ts",
+							"alias": [
+								"ts"
+							]
+						},
+						"vb": {
+							"extname": ".vbs",
+							"alias": [
+								"vbscript",
+								"vbs"
+							]
+						}
+					},
+					"description": "%config.languageDetailsMap%"
 				}
 			}
 		}
