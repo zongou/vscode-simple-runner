@@ -33,6 +33,7 @@ enum contextIds {
 	enableRunButton = extId + '.' + configSectionIds.enableRunButton,
 }
 
+// The first item of alias is selected as langeuage when creating code block cell in notebook.
 const languageDetailsMap = new Map([
 	['ahk', { extname: '.ahk', alias: ['autohotkey'] }],
 	['bat', { extname: '.bat', alias: ['batch'] }],
@@ -44,7 +45,7 @@ const languageDetailsMap = new Map([
 	['javascript', { extname: '.js', alias: ['js'] }],
 	['objective-c', { extname: '.m', alias: ['objective', 'objc'] }],
 	['python', { extname: '.py', alias: ['py', 'py2', 'py3'] }],
-	['powershell', { extname: '.ps1', alias: ['ps1'] }],
+	['powershell', { extname: '.ps1', alias: ['powershell', 'ps1'] }],
 	['rust', { extname: '.rs', alias: ['rs'] }],
 	['shellscript', { extname: '.sh', alias: ['sh', 'shell', 'bash'] }],
 	['typescript', { extname: '.ts', alias: ['ts'] }],
