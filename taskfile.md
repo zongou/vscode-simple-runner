@@ -1,6 +1,6 @@
-# Scripts
+# Tasks
 
-## Install
+## install
 
 ```sh
 npm install
@@ -8,26 +8,28 @@ PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 npm install @vscode/test-web -g
 npm install vsce -g
 ```
 
-## Compile
+## compile
 
 ```sh
 npm run compile
 ```
 
-## Watch
+## watch
 
 ```sh
 npm run watch
 ```
 
-## Test-Web
+## test-Web
 
 ```sh
 vscode-test-web --browser=none --quality=stable --extensionDevelopmentPath=. --printServerLog --verbose --testRunnerDataDir=$HOME/.vscode-test-web
 ```
 
-## Publish
+## publish
+
+[publish with version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#auto-increment-the-extension-version)
 
 ```sh
-vsce publish
+vsce publish minor
 ```
