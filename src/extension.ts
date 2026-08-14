@@ -33,7 +33,7 @@ enum contextIds {
 	enableRunButton = extId + '.' + configSectionIds.enableRunButton,
 }
 
-// The first item of alias is selected as langeuage when creating code block cell in notebook.
+// codeblockLang is prefered when writting notebook codeblock to markdown
 const languageDetailsMap = new Map([
 	['ahk', { extname: '.ahk', alias: ['autohotkey'] }],
 	['bat', { extname: '.bat', alias: ['batch'] }],
@@ -45,9 +45,9 @@ const languageDetailsMap = new Map([
 	['javascript', { extname: '.js', alias: ['js'] }],
 	['objective-c', { extname: '.m', alias: ['objective', 'objc'] }],
 	['python', { extname: '.py', alias: ['py', 'py2', 'py3'] }],
-	['powershell', { extname: '.ps1', alias: ['powershell', 'ps1'] }],
+	['powershell', { extname: '.ps1', alias: ['ps1'] }],
 	['rust', { extname: '.rs', alias: ['rs'] }],
-	['shellscript', { extname: '.sh', alias: ['sh', 'shell', 'bash'] }],
+	['shellscript', { extname: '.sh', alias: ['sh', 'shell', 'bash'], codeblockLang: 'sh' }],
 	['typescript', { extname: '.ts', alias: ['ts'] }],
 	['vb', { extname: '.vbs', alias: ['vbscript', 'vbs'] }],
 ]);
@@ -508,12 +508,11 @@ class MarkdownParser {
 
 			if (cell.kind === vscode.NotebookCellKind.Code) {
 				const indentation = cell.metadata?.raw?.indentation ?? ''
-				const languageAlias = languageDetailsMap.get(cell.languageId)?.alias[0];
-				const shorterName = languageAlias && languageAlias.length < cell.languageId.length ? languageAlias : cell.languageId;
-				const originMdLangId = cell.metadata?.raw?.language;
-				const mdLangId = originMdLangId && getVscLangId(originMdLangId) === cell.languageId ? originMdLangId : shorterName;
+				const defaultLang = languageDetailsMap.get(cell.languageId)?.codeblockLang ?? cell.languageId;
+				const originLang = cell.metadata?.raw?.language;
+				const cellLang = originLang && getVscLangId(originLang) === cell.languageId ? originLang : defaultLang;
 				const fence = cell.metadata?.raw?.fence ?? '```';
-				const codePrefix = indentation + fence + mdLangId + '\n';
+				const codePrefix = indentation + fence + cellLang + '\n';
 				const contents = cell.value.split(/\r?\n/g)
 					.map(line => indentation + line)
 					.join('\n');
