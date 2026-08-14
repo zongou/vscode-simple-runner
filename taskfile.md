@@ -26,7 +26,7 @@ npm run watch
 vscode-test-web --browser=none --quality=stable --extensionDevelopmentPath=. --printServerLog --verbose --testRunnerDataDir=$HOME/.vscode-test-web
 ```
 
-## package
+## publish
 
 [publish with version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#auto-increment-the-extension-version)
 [semver](https://semver.org/)
@@ -40,5 +40,5 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 
 ```sh
-vsce publish
+vsce publish "$@"
 ```
