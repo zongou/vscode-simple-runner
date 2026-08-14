@@ -26,10 +26,19 @@ npm run watch
 vscode-test-web --browser=none --quality=stable --extensionDevelopmentPath=. --printServerLog --verbose --testRunnerDataDir=$HOME/.vscode-test-web
 ```
 
-## publish
+## package
 
 [publish with version](https://code.visualstudio.com/api/working-with-extensions/publishing-extension#auto-increment-the-extension-version)
+[semver](https://semver.org/)
+
+Given a version number MAJOR.MINOR.PATCH, increment the:
+
+- MAJOR version when you make incompatible API changes
+- MINOR version when you add functionality in a backward compatible manner
+- PATCH version when you make backward compatible bug fixes
+
+Additional labels for pre-release and build metadata are available as extensions to the MAJOR.MINOR.PATCH format.
 
 ```sh
-vsce publish minor
+vsce publish
 ```
