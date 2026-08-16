@@ -134,10 +134,10 @@ class Executor {
 					const filePath = path.join(Executor.extTmpDir, file.name);
 					try {
 						const stats = await fs.promises.stat(filePath);
-						const fileCreationTime = stats.birthtimeMs; // Get the file creation time
-						if (currentTime - fileCreationTime >= maxKeepFileSeconds * 1000) {
+						const fileChangedTimeMs = stats.ctimeMs;
+						if (currentTime - fileChangedTimeMs >= maxKeepFileSeconds * 1000) {
 							await fs.promises.rm(filePath, { recursive: true, force: true });
-							logChannelWrite(`[info] Deleted file ${filePath} created ${((currentTime - fileCreationTime) / 1000).toFixed()} seconds ago.\n`);
+							logChannelWrite(`[info] Deleted file ${filePath} saved ${((currentTime - fileChangedTimeMs) / 1000).toFixed()} seconds ago.\n`);
 						}
 					} catch (err) {
 						logChannelWrite(`[error] Failed to delete ${filePath}: ${err}`);
@@ -326,6 +326,8 @@ class Executor {
 				fileContent = content;
 				break;
 		}
+		
+		await Executor.emptyExtTmpDir();
 
 		try {
 			fs.writeFileSync(filePath, fileContent);
@@ -335,7 +337,6 @@ class Executor {
 			throw err;
 		}
 
-		await Executor.emptyExtTmpDir();
 		this.runFile(content, vscLangId, vscode.Uri.file(filePath), execution);
 	}
 }
