@@ -507,11 +507,11 @@ class MarkdownParser {
 			}
 
 			if (cell.kind === vscode.NotebookCellKind.Code) {
-				const indentation = cell.metadata?.raw?.indentation ?? ''
+				const indentation = cell.metadata?.indentation ?? ''
 				const defaultLang = languageDetailsMap.get(cell.languageId)?.codeblockLang ?? cell.languageId;
-				const originLang = cell.metadata?.raw?.language;
+				const originLang = cell.metadata?.language
 				const cellLang = originLang && getVscLangId(originLang) === cell.languageId ? originLang : defaultLang;
-				const fence = cell.metadata?.raw?.fence ?? '```';
+				const fence = cell.metadata?.fence ?? '```';
 				const codePrefix = indentation + fence + cellLang + '\n';
 				const contents = cell.value.split(/\r?\n/g)
 					.map(line => indentation + line)
