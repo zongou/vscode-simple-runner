@@ -8,8 +8,7 @@ enum configSectionIds {
 	enableRunButton = 'enableRunButton',
 	enableMarkdownCodeLens = 'enableMarkdownCodeLens',
 	runInTerminal = 'runInTerminal',
-	showDebugInfo = 'showDebugInfo',
-	showTimestampInDebugInfo = 'showTimestampInDebugInfo',
+	enableLog = 'enableLog',
 	clearOutputBeforeRun = 'clearOutputBeforeRun',
 	showOutputBeforeRun = 'showOutputBeforeRun',
 	executorMap = 'executorMap',
@@ -22,7 +21,7 @@ enum commandIds {
 	editCodeBlock = extId + '.' + 'editCodeBlock',
 	runCodeBlock = extId + '.' + 'runCodeBlock',
 	toggleRunInTerminal = extId + '.' + 'toggleRunInTerminal',
-	toggleShowDebugInfo = extId + '.' + 'toggleShowDebugInfo',
+	toggleShowOutptBeforeRun = extId + '.' + 'toggleShowOutputBeforeRun',
 	toggleClearOutputBeforeRun = extId + '.' + 'toggleClearOutputBeforeRun',
 }
 
@@ -53,6 +52,7 @@ const languageDetailsMap = new Map([
 ]);
 
 const outputChannel = vscode.window.createOutputChannel(extTitle, 'log');
+const logChannel = vscode.window.createOutputChannel(`${extTitle} Log`, 'log');
 const fileTaskMap: Map<string, any> = new Map();
 
 function safeImportNodeApi(name: string) {
@@ -82,9 +82,9 @@ function getTimeStamp(date: Date) {
 	return date.toISOString().replace('T', ' ').replace('Z', '');
 }
 
-function logWrite(msg: string, timeStamp: string = getTimeStamp(new Date()), prefix: string = '') {
-	if (getConfigValue(configSectionIds.showDebugInfo) || getConfigValue(configSectionIds.runInTerminal)) {
-		outputChannel.append(prefix + (getConfigValue(configSectionIds.showTimestampInDebugInfo) ? getTimeStamp(new Date()) + ' ' : '') + msg);
+function logChannelWrite(msg: string, timeStamp: string = getTimeStamp(new Date()), prefix: string = '') {
+	if (getConfigValue(configSectionIds.enableLog)) {
+		logChannel.append(prefix + getTimeStamp(new Date()) + ' '  + msg);
 	}
 }
 
@@ -112,13 +112,13 @@ class Executor {
 		if (!fs.existsSync(extTmpDir)) {
 			try {
 				fs.mkdirSync(extTmpDir, { recursive: true });
-				logWrite(`[info] Directory ${extTmpDir} created successfully.\n`);
+				logChannelWrite(`[info] Directory ${extTmpDir} created successfully.\n`);
 			} catch (err) {
-				logWrite(`[error] Failed to create directory: ${err}\n`);
+				logChannelWrite(`[error] Failed to create directory: ${err}\n`);
 				throw err;
 			}
 		}
-		logWrite(`[info] Extension temporary directory: ${extTmpDir}\n`);
+		logChannelWrite(`[info] Extension temporary directory: ${extTmpDir}\n`);
 		return extTmpDir;
 	}
 
@@ -137,14 +137,14 @@ class Executor {
 						const fileCreationTime = stats.birthtimeMs; // Get the file creation time
 						if (currentTime - fileCreationTime >= maxKeepFileSeconds * 1000) {
 							await fs.promises.rm(filePath, { recursive: true, force: true });
-							logWrite(`[info] Deleted ${filePath} created ${((currentTime - fileCreationTime) / 1000).toFixed()} seconds ago.\n`);
+							logChannelWrite(`[info] Deleted file ${filePath} created ${((currentTime - fileCreationTime) / 1000).toFixed()} seconds ago.\n`);
 						}
 					} catch (err) {
-						logWrite(`[error] Failed to delete ${filePath}: ${err}`);
+						logChannelWrite(`[error] Failed to delete ${filePath}: ${err}`);
 					}
 				}
 			} catch (err) {
-				logWrite(`[error] Failed to read directory: ${err}\n`);
+				logChannelWrite(`[error] Failed to read directory: ${err}\n`);
 				throw err;
 			}
 		}
@@ -205,7 +205,7 @@ class Executor {
 				execution?.start(startTime);
 				execution?.clearOutput();
 				const processMsg = `[PID:${childProcess.pid}]`;
-				logWrite(`[info] ${processMsg} Running: ${command}\n`, getTimeStamp(new Date(startTime)));
+				logChannelWrite(`[info] ${processMsg} Running \`${command}\``, getTimeStamp(new Date(startTime)));
 				fileTaskMap.set(file.path, childProcess);
 				vscode.commands.executeCommand('setContext', contextIds.fileListInTask, Array.from(fileTaskMap.keys()));
 
@@ -266,7 +266,7 @@ class Executor {
 							msg = `[${code === 0 ? 'info' : 'error'}] ${processMsg} Exited with code: ${code}${elapsedTimeMsg}\n`;
 						}
 
-						logWrite(msg, undefined, '\n');
+						logChannelWrite(msg, undefined, '\n');
 						execution?.end(code === 0, endTime);
 						resolve();
 					});
@@ -329,8 +329,9 @@ class Executor {
 
 		try {
 			fs.writeFileSync(filePath, fileContent);
+			logChannelWrite(`[info] Created file ${filePath}\n`)
 		} catch (err) {
-			logWrite(`[error] Failed to write to file: ${err}\n`);
+			logChannelWrite(`[error] Failed to write to file: ${err}\n`);
 			throw err;
 		}
 
@@ -707,7 +708,7 @@ function initNotebook(context: vscode.ExtensionContext): NotebookKernel | undefi
 function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: NotebookKernel | undefined) {
 	const toggleMap = new Map();
 	toggleMap.set(commandIds.toggleRunInTerminal, configSectionIds.runInTerminal);
-	toggleMap.set(commandIds.toggleShowDebugInfo, configSectionIds.showDebugInfo);
+	toggleMap.set(commandIds.toggleShowOutptBeforeRun, configSectionIds.showOutputBeforeRun);
 	toggleMap.set(commandIds.toggleClearOutputBeforeRun, configSectionIds.clearOutputBeforeRun);
 
 	toggleMap.forEach((section, mapKey) => {
@@ -732,7 +733,7 @@ function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: Not
 
 export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.executeCommand('setContext', contextIds.isWeb, isWeb);
-	logWrite(`[info] isWeb: ${isWeb}\n`);
+	logChannelWrite(`[info] isWeb: ${isWeb}\n`);
 
 	initMarkdownCodeLens(context);
 	initRunButton(context);
