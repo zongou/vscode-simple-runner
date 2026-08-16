@@ -1,6 +1,7 @@
 .vscode
 src
 .gitignore
+eslint.config.mjs
 tsconfig.json
 .vscode-test-web
 taskfile.md
