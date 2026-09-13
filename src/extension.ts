@@ -662,7 +662,7 @@ function initRunButton(context: vscode.ExtensionContext) {
 	if (!isWeb) {
 		vscode.commands.executeCommand('setContext', contextIds.enableRunButton, getConfigValue(configSectionIds.enableRunButton));
 		context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
-			if (event.affectsConfiguration(configSectionIds.enableRunButton)) {
+			if (event.affectsConfiguration(extId + "." + configSectionIds.enableRunButton)) {
 				vscode.commands.executeCommand('setContext', contextIds.enableRunButton, getConfigValue(configSectionIds.enableRunButton));
 			}
 		}));
@@ -719,14 +719,16 @@ function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: Not
 	});
 
 	const updateSupportedLanguages = () => {
-		const supportedLanguages = Object.keys(getConfigValue(configSectionIds.executorMap)).filter(k => getConfigValue(configSectionIds.executorMap)[k]);
+		const supportedLanguages = Object.entries(getConfigValue(configSectionIds.executorMap))
+			.filter(([_, v]) => v && v !== '')
+			.map(([k, _]) => k);
 		vscode.commands.executeCommand('setContext', contextIds.supportedLanguages, supportedLanguages);
 		notebookKernel?.setSupportedLanguages(supportedLanguages);
 	};
 
 	updateSupportedLanguages();
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
-		if (event.affectsConfiguration(configSectionIds.executorMap)) {
+		if (event.affectsConfiguration(extId + "." + configSectionIds.executorMap)) {
 			updateSupportedLanguages();
 		}
 	}));
