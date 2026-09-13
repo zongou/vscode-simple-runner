@@ -2,7 +2,7 @@
 	"name": "simple-runner",
 	"displayName": "Simple Runner",
 	"description": "Markdown notbook support, run simple code and Markdown code blocks.",
-	"version": "0.1.5",
+	"version": "0.1.6",
 	"publisher": "zongou",
 	"repository": "https://github.com/zongou/vscode-simple-runner",
 	"engines": {
