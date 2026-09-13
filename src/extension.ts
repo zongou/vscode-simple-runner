@@ -4,14 +4,14 @@ const isWeb: boolean = typeof process === 'undefined';
 const extId = 'simple-runner';
 const extTitle = 'Simple Runner';
 
-enum configSectionIds {
-	enableRunButton = 'enableRunButton',
-	enableMarkdownCodeLens = 'enableMarkdownCodeLens',
-	runInTerminal = 'runInTerminal',
-	enableLog = 'enableLog',
-	clearOutputBeforeRun = 'clearOutputBeforeRun',
-	showOutputBeforeRun = 'showOutputBeforeRun',
-	executorMap = 'executorMap',
+enum configIds {
+	enableRunButton = extId + '.' + 'enableRunButton',
+	enableMarkdownCodeLens = extId + '.' + 'enableMarkdownCodeLens',
+	runInTerminal = extId + '.' + 'runInTerminal',
+	enableLog = extId + '.' + 'enableLog',
+	clearOutputBeforeRun = extId + '.' + 'clearOutputBeforeRun',
+	showOutputBeforeRun = extId + '.' + 'showOutputBeforeRun',
+	executorMap = extId + '.' + 'executorMap',
 }
 
 enum commandIds {
@@ -29,7 +29,6 @@ enum contextIds {
 	isWeb = extId + '.' + 'isWeb',
 	fileListInTask = extId + '.' + 'fileListInTask',
 	supportedLanguages = extId + '.' + 'supportedLanguages',
-	enableRunButton = extId + '.' + configSectionIds.enableRunButton,
 }
 
 // codeblockLang is prefered when writting notebook codeblock to markdown
@@ -75,7 +74,7 @@ function getVscLangId(mdLangId: string): string {
 }
 
 function getConfigValue(section: string): any {
-	return vscode.workspace.getConfiguration(extId).get(section);
+	return vscode.workspace.getConfiguration(section);
 }
 
 function getTimeStamp(date: Date) {
@@ -83,7 +82,7 @@ function getTimeStamp(date: Date) {
 }
 
 function logChannelWrite(msg: string, timeStamp: string = getTimeStamp(new Date()), prefix: string = '') {
-	if (getConfigValue(configSectionIds.enableLog)) {
+	if (getConfigValue(configIds.enableLog)) {
 		logChannel.append(prefix + getTimeStamp(new Date()) + ' '  + msg);
 	}
 }
@@ -129,7 +128,7 @@ class Executor {
 			try {
 				const files = await fs.promises.readdir(Executor.extTmpDir, { withFileTypes: true });
 				const currentTime = Date.now();
-				const maxKeepFileSeconds = getConfigValue(configSectionIds.runInTerminal) ? 10 : 1;
+				const maxKeepFileSeconds = getConfigValue(configIds.runInTerminal) ? 10 : 1;
 				for (const file of files) {
 					const filePath = path.join(Executor.extTmpDir, file.name);
 					try {
@@ -155,10 +154,10 @@ class Executor {
 			this.terminal = vscode.window.activeTerminal ?? vscode.window.createTerminal();
 		}
 
-		if (getConfigValue(configSectionIds.showOutputBeforeRun)) {
+		if (getConfigValue(configIds.showOutputBeforeRun)) {
 			this.terminal.show();
 		}
-		if (getConfigValue(configSectionIds.clearOutputBeforeRun)) {
+		if (getConfigValue(configIds.clearOutputBeforeRun)) {
 			vscode.commands.executeCommand('workbench.action.terminal.clear');
 		}
 		execution?.start();
@@ -174,10 +173,10 @@ class Executor {
 				stderr: '',
 			}
 
-			if (getConfigValue(configSectionIds.showOutputBeforeRun) && !execution) {
+			if (getConfigValue(configIds.showOutputBeforeRun) && !execution) {
 				outputChannel?.show(true);
 			}
-			if (getConfigValue(configSectionIds.clearOutputBeforeRun)) {
+			if (getConfigValue(configIds.clearOutputBeforeRun)) {
 				outputChannel?.clear();
 			}
 
@@ -286,7 +285,7 @@ class Executor {
 		const fileDirname = path.dirname(filePath);
 		const fileDirnameBasename = path.basename(fileDirname);
 
-		const command = getConfigValue(configSectionIds.executorMap)[vscLangId]
+		const command = getConfigValue(configIds.executorMap)[vscLangId]
 			.replace(/\$\{file\}/g, filePath)
 			.replace(/\$\{fileBasename\}/g, fileBasename)
 			.replace(/\$\{fileBasenameNoExtension\}/g, fileBasenameNoExtension)
@@ -298,7 +297,7 @@ class Executor {
 			.replace(/\$\{content\}/g, content)
 			.replace(/\$\{extTmpDir\}/g, Executor.extTmpDir);
 
-		if (getConfigValue(configSectionIds.runInTerminal)) {
+		if (getConfigValue(configIds.runInTerminal)) {
 			this.execInTerminal(command, execution);
 		} else {
 			this.execInChildProcess(command, file, execution);
@@ -584,7 +583,7 @@ function initMarkdownCodeLens(context: vscode.ExtensionContext,) {
 		provideCodeLenses: (document: vscode.TextDocument, token: vscode.CancellationToken) => {
 			const codeLenses: vscode.CodeLens[] = [];
 
-			if (getConfigValue(configSectionIds.enableMarkdownCodeLens)) {
+			if (getConfigValue(configIds.enableMarkdownCodeLens)) {
 				MarkdownParser.parseMarkdown(document.getText()).forEach((cell, index) => {
 					if (cell.kind === vscode.NotebookCellKind.Code) {
 						codeLenses.push(new vscode.CodeLens(cell.metadata?.range, {
@@ -602,7 +601,7 @@ function initMarkdownCodeLens(context: vscode.ExtensionContext,) {
 							arguments: [cell, index, document]
 						}));
 
-						const runner = getConfigValue(configSectionIds.executorMap)[getVscLangId(cell.languageId)];
+						const runner = getConfigValue(configIds.executorMap)[getVscLangId(cell.languageId)];
 						if (!isWeb && runner) {
 							codeLenses.push(new vscode.CodeLens(cell.metadata?.range, {
 								command: commandIds.runCodeBlock,
@@ -660,10 +659,10 @@ function initMarkdownCodeLens(context: vscode.ExtensionContext,) {
 
 function initRunButton(context: vscode.ExtensionContext) {
 	if (!isWeb) {
-		vscode.commands.executeCommand('setContext', contextIds.enableRunButton, getConfigValue(configSectionIds.enableRunButton));
+		vscode.commands.executeCommand('setContext', configIds.enableRunButton, getConfigValue(configIds.enableRunButton));
 		context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
-			if (event.affectsConfiguration(extId + "." + configSectionIds.enableRunButton)) {
-				vscode.commands.executeCommand('setContext', contextIds.enableRunButton, getConfigValue(configSectionIds.enableRunButton));
+			if (event.affectsConfiguration(configIds.enableRunButton)) {
+				vscode.commands.executeCommand('setContext', configIds.enableRunButton, getConfigValue(configIds.enableRunButton));
 			}
 		}));
 
@@ -708,9 +707,9 @@ function initNotebook(context: vscode.ExtensionContext): NotebookKernel | undefi
 
 function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: NotebookKernel | undefined) {
 	const toggleMap = new Map();
-	toggleMap.set(commandIds.toggleRunInTerminal, configSectionIds.runInTerminal);
-	toggleMap.set(commandIds.toggleShowOutptBeforeRun, configSectionIds.showOutputBeforeRun);
-	toggleMap.set(commandIds.toggleClearOutputBeforeRun, configSectionIds.clearOutputBeforeRun);
+	toggleMap.set(commandIds.toggleRunInTerminal, configIds.runInTerminal);
+	toggleMap.set(commandIds.toggleShowOutptBeforeRun, configIds.showOutputBeforeRun);
+	toggleMap.set(commandIds.toggleClearOutputBeforeRun, configIds.clearOutputBeforeRun);
 
 	toggleMap.forEach((section, mapKey) => {
 		context.subscriptions.push(vscode.commands.registerCommand(mapKey, (file) => {
@@ -719,7 +718,7 @@ function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: Not
 	});
 
 	const updateSupportedLanguages = () => {
-		const supportedLanguages = Object.entries(getConfigValue(configSectionIds.executorMap))
+		const supportedLanguages = Object.entries(getConfigValue(configIds.executorMap))
 			.filter(([_, v]) => v && v !== '')
 			.map(([k, _]) => k);
 		vscode.commands.executeCommand('setContext', contextIds.supportedLanguages, supportedLanguages);
@@ -728,7 +727,7 @@ function initConfigUpdater(context: vscode.ExtensionContext, notebookKernel: Not
 
 	updateSupportedLanguages();
 	context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
-		if (event.affectsConfiguration(extId + "." + configSectionIds.executorMap)) {
+		if (event.affectsConfiguration(configIds.executorMap)) {
 			updateSupportedLanguages();
 		}
 	}));
