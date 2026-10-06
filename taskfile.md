@@ -20,7 +20,7 @@ npm run compile
 npm run watch
 ```
 
-## test-Web
+## test-web
 
 ```sh
 vscode-test-web --browser=none --quality=stable --extensionDevelopmentPath=. --printServerLog --verbose --testRunnerDataDir=$HOME/.vscode-test-web
